@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 """Loading the data"""
-world_food_facts = pd.read_csv('C:/Users/samha/Desktop/GITHUB/Datasets/en.openfoodfacts.org.products.tsv.', 
+world_food_facts = pd.read_csv('C:/Users/REDACTED/Desktop/GITHUB/Datasets/en.openfoodfacts.org.products.tsv.', 
                                sep='\t',                            #specifies that the file is a tab-separated values file
                                index_col=0,                         #specifies that the first column of the file should be used as the index of the dataframe
                                low_memory=False                     #specifies that the file should be read in chunks to reduce memory usage
