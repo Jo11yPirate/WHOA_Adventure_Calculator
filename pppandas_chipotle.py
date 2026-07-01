@@ -1,4 +1,4 @@
-"""Setting up the environment"""
+"""Setting up the environment for pandas exercises"""
 import pandas as pd
 import numpy as np
 
