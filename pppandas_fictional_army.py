@@ -36,7 +36,9 @@ print(fictional_army.describe().round(2))  # Display a concise summary of the Da
 
 print(divider)
 print("COLUMNS:")
-print(fictional_army.columns)  # Display the column labels of the DataFrame
+#print(fictional_army.columns)  # Display the column labels of the DataFrame
+for column, label in enumerate(fictional_army, start=1): # Displays as a numbered list for better readability
+	print(f'{column}. {label}')
 
 print(divider)
 print("INDEX:")
@@ -79,8 +81,8 @@ print(fictional_army.corr(numeric_only=True).round(2))  # Compute pairwise corre
 # Visualize the DataFrame to detect anomalies and patterns
 # ===========
 
-fictional_army.groupby('regiment')['deaths'].sum().plot(kind='bar', title='Total Deaths by Regiment')  # Create a bar plot of total deaths by regiment
-plt.show()  # Display the plot
+#fictional_army.groupby('regiment')['deaths'].sum().plot(kind='bar', title='Total Deaths by Regiment')  # Create a bar plot of total deaths by regiment
+#plt.show()  # Display the plot
 
 # ==========
 # Ask questions about the DataFrame
@@ -94,3 +96,57 @@ plt.show()  # Display the plot
 # ==========
 # Work through guipsamora exercises
 # ==========
+
+fictional_army.set_index('origin', inplace=True)  # Set the 'origin' column as the index of the DataFrame
+
+print(divider)
+print("VETERANS COLUMN:")
+print(fictional_army['veterans'].head(5))  # Display the first 5 rows of the 'veterans' column
+
+print(divider)
+print("VETERANS & DEATHS COLUMNS:")
+print(fictional_army[['veterans', 'deaths']].head(5))  # Display the first 5 rows of the 'veterans' and 'deaths' columns
+
+print(divider)
+print("VETERANS, SIZE, & DESERTERS FROM MAINE & ALASKA:")
+print(fictional_army.loc[['Maine', 'Alaska'], ['veterans', 'size', 'deserters']])  # Display the 'veterans', 'size', and 'deserters' columns for the rows with index labels 'Maine' and 'Alaska'
+
+print(divider)
+print("ROWS 3 TO 7, COLUMNS 3 TO 6:")
+print(fictional_army.iloc[2:8, 2:7])  # Display the rows from index 3 to 7 and columns from index 3 to 6 of the DataFrame
+
+print(divider)
+print("ALL ROWS AFTER FOURTH ROW:")
+print(fictional_army.iloc[4:])  # Display all rows after the fourth row of the DataFrame
+
+print(divider)
+print("ALL ROWS BEFORE FOURTH ROW:")
+print(fictional_army.iloc[:4])  # Display all rows before the fourth row of the DataFrame
+
+print(divider)
+print("THIRD THRU SEVENTH COLUMNS:")
+print(fictional_army.iloc[:, 2:7])  # Display the third through seventh columns of the DataFrame
+
+print(divider)
+print("ROWS WHERE DEATHS > 50:")
+print(fictional_army[fictional_army['deaths'] > 50])  # Display rows where the 'deaths' column has values greater than 50
+
+print(divider)
+print("ROWS WHERE DEATHS > 500 OR < 50:")
+print(fictional_army[(fictional_army["deaths"] > 500) | (fictional_army["deaths"] < 50)]) # Display rows where the 'death's column has values greater than 500 or less than 50
+
+print(divider)
+print("ALL REGIMENTS NOT NAMED 'DRAGOONS':")
+print(fictional_army[fictional_army['regiment'] != 'Dragoons']) # Display all regiments besides the one named 'Dragoons'
+
+print(divider)
+print("ROWS LABELED 'Texas' AND 'Arizona':")
+print(fictional_army.loc[['Texas', 'Arizona'], :]) # Display all columns of the rows labeled 'Texas' and 'Arizona'
+
+print(divider)
+print("THIRD CELL IN THE ROW LABELED 'Arizona':")
+print(fictional_army.loc[['Arizona']].iloc[:, 2])
+
+print(divider)
+print("THIRD CELL IN COLUMN LABELED 'Deaths':")
+print(fictional_army.loc[:, ['deaths']].iloc[2])
