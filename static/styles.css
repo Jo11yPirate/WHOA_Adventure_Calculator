@@ -471,6 +471,26 @@ button:hover {
   letter-spacing: .01em;
 }
 
+.score-mix {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.score-mix span {
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+.score-mix strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--accent);
+}
+
 .recommendation {
   margin-top: 20px;
   border: 1px solid #624125;

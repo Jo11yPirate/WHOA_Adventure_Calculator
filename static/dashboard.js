@@ -36,6 +36,11 @@ function readOptionalNumber(id) {
   return value;
 }
 
+function setText(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value;
+}
+
 function format(value) {
   return Math.round(value).toLocaleString();
 }
@@ -126,6 +131,28 @@ function runRecalculationPipeline() {
     const damageReduction = Math.min(readNumber("damage_reduction_percentage"), 90) / 100;
     const defenseScore = readNumber("defense_score");
     const defenseBonus = readNumber("defense_bonus_percentage") / 100;
+    const hp = readNumber("stat_hp") * (1 + readNumber("hp_bonus_percentage") / 100);
+    const defense = defenseScore * (1 + defenseBonus);
+    const evasion = readNumber("stat_evasion") * (1 + readNumber("evasion_bonus_percentage") / 100);
+    const critResistance = readNumber("stat_crit_resistance") * (1 + readNumber("crit_res_bonus_percentage") / 100);
+    const survivalDamageReduction = Math.min(99.99, readNumber("damage_reduction_percentage"));
+    const contributions = {
+      hp: hp * 0.0023,
+      defense,
+      evasion,
+      critResistance,
+    };
+    const weightedScore = Object.values(contributions).reduce((sum, value) => sum + value, 0);
+    const effectiveHp = hp / (1 - survivalDamageReduction / 100);
+    const upgradeHp = readOptionalNumber("upgrade_hp");
+    const upgradeDefense = readOptionalNumber("upgrade_defense");
+    const upgradeEvasion = readOptionalNumber("upgrade_evasion");
+    const upgradeCritResistance = readOptionalNumber("upgrade_crit_resistance");
+    const upgradeDamageReduction = readOptionalNumber("upgrade_damage_reduction");
+    const upgradedScore = (hp + upgradeHp) * 0.0023 + defense + upgradeDefense +
+      evasion + upgradeEvasion + critResistance + upgradeCritResistance;
+    const upgradedDamageReduction = Math.min(99.99, survivalDamageReduction + upgradeDamageReduction);
+    const upgradedEffectiveHp = (hp + upgradeHp) / (1 - upgradedDamageReduction / 100);
     const isHealing = document.getElementById("class-select").value === "Priest";
     const coreOutput = baseAttribute + penetrationRating + (isHealing ? hitRating : 0);
     const rawOutput = coreOutput * skillRate * (1 + outputBonus) * inscriptionLayer;
@@ -144,6 +171,18 @@ function runRecalculationPipeline() {
     document.getElementById("log-mitigation").textContent = `×${mitigation.toFixed(3)}`;
     document.getElementById("log-crit-mult").textContent = `×${criticalMultiplier.toFixed(2)} after resistance`;
     document.getElementById("log-mitigation").textContent = "Enemy defense not entered";
+    setText("res-effective-hp", format(effectiveHp));
+    setText("res-weighted-score", format(weightedScore));
+    setText("res-hp-contribution", format(contributions.hp));
+    setText("res-defense-contribution", format(contributions.defense));
+    setText("res-evasion-contribution", format(contributions.evasion));
+    setText("res-crit-res-contribution", format(contributions.critResistance));
+    setText("res-upgrade-score", `${upgradedScore - weightedScore >= 0 ? "+" : ""}${format(upgradedScore - weightedScore)}`);
+    setText("res-upgrade-hp", `${upgradedEffectiveHp - effectiveHp >= 0 ? "+" : ""}${format(upgradedEffectiveHp - effectiveHp)}`);
+    setText("mix-hp", `${((contributions.hp / weightedScore) * 100).toFixed(2)}%`);
+    setText("mix-defense", `${((contributions.defense / weightedScore) * 100).toFixed(2)}%`);
+    setText("mix-evasion", `${((contributions.evasion / weightedScore) * 100).toFixed(2)}%`);
+    setText("mix-crit-res", `${((contributions.critResistance / weightedScore) * 100).toFixed(2)}%`);
     updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, readNumber("stat_defense_rating"), penetrationRating, outputBonus, 0, mitigation, incomingDamage, damageReduction, damageReceived);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;

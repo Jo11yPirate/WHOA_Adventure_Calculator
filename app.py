@@ -215,7 +215,7 @@ def calculate_ascendancy(values):
     normal_center_hit = core_output * skill_rate * damage_bonus_multiplier * inscription_layer
     critical_center_hit = normal_center_hit * 2
     critical_rate = (crit / core_output * 100) if core_output else 0
-    return {
+    result = {
         **values,
         "is_healing": is_healing,
         "base_damage": base_damage,
@@ -233,6 +233,44 @@ def calculate_ascendancy(values):
         "damage_received": 0.0,
         "damage_reduction_applied": 0.0,
     }
+    hp = values.get("stat_hp", 0) * (1 + values.get("hp_bonus_percentage", 0) / 100)
+    defense = values.get("defense_score", 0) * (1 + values.get("defense_bonus_percentage", 0) / 100)
+    evasion = values.get("stat_evasion", 0) * (1 + values.get("evasion_bonus_percentage", 0) / 100)
+    crit_resistance = values.get("stat_crit_resistance", 0) * (1 + values.get("crit_res_bonus_percentage", 0) / 100)
+    damage_reduction = min(99.99, max(0, values.get("damage_reduction_percentage", 0)))
+    contributions = {
+        "hp": hp * 0.0023,
+        "defense": defense,
+        "evasion": evasion,
+        "crit_resistance": crit_resistance,
+    }
+    result.update({
+        "effective_hp": hp / (1 - damage_reduction / 100),
+        "weighted_score": sum(contributions.values()),
+        "hp_contribution": contributions["hp"],
+        "defense_contribution": contributions["defense"],
+        "evasion_contribution": contributions["evasion"],
+        "crit_resistance_contribution": contributions["crit_resistance"],
+        "damage_reduction_for_survival": damage_reduction,
+    })
+    upgrade = {
+        "hp": values.get("upgrade_hp", 0),
+        "defense": values.get("upgrade_defense", 0),
+        "evasion": values.get("upgrade_evasion", 0),
+        "crit_resistance": values.get("upgrade_crit_resistance", 0),
+        "damage_reduction": values.get("upgrade_damage_reduction", 0),
+    }
+    upgraded_score = (
+        (hp + upgrade["hp"]) * 0.0023
+        + defense + upgrade["defense"]
+        + evasion + upgrade["evasion"]
+        + crit_resistance + upgrade["crit_resistance"]
+    )
+    upgraded_damage_reduction = min(99.99, max(0, damage_reduction + upgrade["damage_reduction"]))
+    upgraded_effective_hp = (hp + upgrade["hp"]) / (1 - upgraded_damage_reduction / 100)
+    result["upgrade_score_change"] = upgraded_score - result["weighted_score"]
+    result["upgrade_effective_hp_change"] = upgraded_effective_hp - result["effective_hp"]
+    return result
 
 
 def read_stats(form):
@@ -287,9 +325,21 @@ def read_universal(form):
         "damage_reduction_percentage",
         "defense_score",
         "defense_bonus_percentage",
+        "upgrade_hp",
+        "upgrade_defense",
+        "upgrade_evasion",
+        "upgrade_crit_resistance",
+        "upgrade_damage_reduction",
     ):
         value = form.get(field, type=float)
-        if field == "incoming_damage" and value is None:
+        if field in {
+            "incoming_damage",
+            "upgrade_hp",
+            "upgrade_defense",
+            "upgrade_evasion",
+            "upgrade_crit_resistance",
+            "upgrade_damage_reduction",
+        } and value is None:
             value = 0.0
         if value is None or value < 0:
             raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
