@@ -243,19 +243,21 @@
       </section>
 
       <section id="reference" class="app-page card guide" data-app-page="reference">
-        <div class="section-heading"><div><p class="eyebrow">Class Reference</p><h2>Build Priorities</h2></div></div>
-        <div class="guide-grid">
-          {% for class_name, profile in class_profiles.items() %}
-            <div class="class-reference" data-reference-class="{{ class_name }}" {% if class_name != selected_class %}hidden{% endif %}>
-              <strong>{{ class_name }}</strong>
-              <span>{{ class_guidance[class_name] }}</span>
-              <span><b>Gems:</b> {{ profile.gems }}</span>
-              <span><b>Refinement:</b> {{ profile.refinement }}</span>
-              <span><b>Focus:</b> {{ profile.notable }}</span>
-            </div>
-          {% endfor %}
+        <div class="reference-section">
+          <div class="section-heading"><div><p class="eyebrow">Class Reference</p><h2>Build Priorities</h2></div></div>
+          <div class="guide-grid">
+            {% for class_name, profile in class_profiles.items() %}
+              <div class="class-reference" data-reference-class="{{ class_name }}" {% if class_name != selected_class %}hidden{% endif %}>
+                <strong>{{ class_name }}</strong>
+                <span>{{ class_guidance[class_name] }}</span>
+                <span><b>Gems:</b> {{ profile.gems }}</span>
+                <span><b>Refinement:</b> {{ profile.refinement }}</span>
+                <span><b>Focus:</b> {{ profile.notable }}</span>
+              </div>
+            {% endfor %}
+          </div>
         </div>
-        <div class="formula-guide">
+        <div class="reference-section formula-guide">
           <div class="section-heading"><div><p class="eyebrow">Formula Guide</p></div></div>
           <div class="formula-list">
             {% for name, formula in formula_guidance.items() %}
@@ -263,7 +265,7 @@
             {% endfor %}
           </div>
         </div>
-        <div class="formula-guide">
+        <div class="reference-section formula-guide">
           <div class="section-heading"><div><p class="eyebrow">ASCENDANCY Combat Lab</p><h2>Verified Model Equations</h2></div></div>
           <div class="formula-list">
             {% for name, formula in ascendancy_formulas.items() %}

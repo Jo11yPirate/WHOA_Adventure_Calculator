@@ -687,8 +687,25 @@ th:last-child, td:last-child {
   margin-top: 14px;
 }
 
+.reference-section {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #171717;
+  padding: 14px;
+}
+
+.reference-section + .reference-section {
+  margin-top: 14px;
+}
+
+.reference-section .section-heading {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
 .formula-guide {
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .formula-list {
