@@ -69,39 +69,41 @@ function format(value) {
 }
 
 function setBar(id, value, maximum) {
-  document.getElementById(id).style.width = `${maximum ? Math.min(100, (value / maximum) * 100) : 0}%`;
+  const bar = document.getElementById(id);
+  if (bar) bar.style.width = `${maximum ? Math.min(100, (value / maximum) * 100) : 0}%`;
 }
 
 function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, penetration, outputBonus, enemyDefense, mitigation, incomingDamage, damageReduction, damageReceived) {
   const outputMax = Math.max(rawOutput, criticalOutput, 1);
   setBar("bar-normal", normalOutput, outputMax);
   setBar("bar-critical", criticalOutput, outputMax);
-  document.getElementById("bar-normal-value").textContent = format(normalOutput);
-  document.getElementById("bar-critical-value").textContent = format(criticalOutput);
+  setText("bar-normal-value", format(normalOutput));
+  setText("bar-critical-value", format(criticalOutput));
   const statMax = Math.max(attack, defense, penetration, 1);
   setBar("bar-attack", attack, statMax);
   setBar("bar-defense", defense, statMax);
   setBar("bar-penetration", penetration, statMax);
-  document.getElementById("bar-attack-value").textContent = format(attack);
-  document.getElementById("bar-defense-value").textContent = format(defense);
-  document.getElementById("bar-penetration-value").textContent = format(penetration);
-  document.getElementById("screen-normal").textContent = format(normalOutput);
-  document.getElementById("screen-critical").textContent = format(criticalOutput);
+  setText("bar-attack-value", format(attack));
+  setText("bar-defense-value", format(defense));
+  setText("bar-penetration-value", format(penetration));
+  setText("screen-normal", format(normalOutput));
+  setText("screen-critical", format(criticalOutput));
   const graphMax = Math.max(criticalOutput, 1);
   const normalHeight = Math.max(4, (normalOutput / graphMax) * 86);
   const criticalHeight = Math.max(4, (criticalOutput / graphMax) * 86);
   const normalBar = document.getElementById("graph-normal");
   const criticalBar = document.getElementById("graph-critical");
-  normalBar.setAttribute("y", 126 - normalHeight);
-  normalBar.setAttribute("height", normalHeight);
-  criticalBar.setAttribute("y", 126 - criticalHeight);
-  criticalBar.setAttribute("height", criticalHeight);
-  document.getElementById("screen-attack").textContent = format(attack);
-  document.getElementById("screen-penetration").textContent = format(penetration);
-  document.getElementById("screen-bonus").textContent = `${(outputBonus * 100).toFixed(1)}%`;
-  document.getElementById("screen-incoming").textContent = format(incomingDamage);
-  document.getElementById("screen-damage-reduction").textContent = `${(damageReduction * 100).toFixed(1)}%`;
-  document.getElementById("screen-taken").textContent = format(damageReceived);
+  if (normalBar) {
+    normalBar.setAttribute("y", 126 - normalHeight);
+    normalBar.setAttribute("height", normalHeight);
+  }
+  if (criticalBar) {
+    criticalBar.setAttribute("y", 126 - criticalHeight);
+    criticalBar.setAttribute("height", criticalHeight);
+  }
+  setText("screen-attack", format(attack));
+  setText("screen-penetration", format(penetration));
+  setText("screen-bonus", `${(outputBonus * 100).toFixed(1)}%`);
 }
 
 function updateClassReference(className) {
@@ -168,16 +170,15 @@ function runRecalculationPipeline() {
     const estimatedAccuracy = Math.min(100, hitRating);
     const critEvaluation = effectiveStat("Critical_Rate_Percentage", critRating);
 
-    document.getElementById("res-raw").textContent = format(rawOutput);
-    document.getElementById("res-normal").textContent = format(rawOutput * mitigation);
-    document.getElementById("res-crit").textContent = format(rawOutput * mitigation * criticalMultiplier);
-    document.getElementById("res-critical-rate").textContent = `${criticalRate.toFixed(2)}%`;
+    setText("res-raw", format(rawOutput));
+    setText("res-normal", format(rawOutput * mitigation));
+    setText("res-crit", format(rawOutput * mitigation * criticalMultiplier));
+    setText("res-critical-rate", `${criticalRate.toFixed(2)}%`);
     setText("res-heal-power", coreOutput.toFixed(2));
-    document.getElementById("res-estimated-accuracy").textContent = `${estimatedAccuracy.toFixed(2)}%`;
-    document.getElementById("log-mitigation").textContent = `×${mitigation.toFixed(3)}`;
-    document.getElementById("log-crit-mult").textContent = `×${criticalMultiplier.toFixed(2)} after resistance`;
-    document.getElementById("log-mitigation").textContent = "Enemy Defense Unknown";
-    updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, 0, penetrationRating, outputBonus, 0, mitigation, 0, 0, 0);
+    setText("res-estimated-accuracy", `${estimatedAccuracy.toFixed(2)}%`);
+    setText("log-mitigation", "Enemy Defense Unknown");
+    setText("log-crit-mult", `×${criticalMultiplier.toFixed(2)} after resistance`);
+    updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, readNumber("stat_defense_rating"), penetrationRating, outputBonus, 0, mitigation, 0, 0, 0);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;
   } catch (validationError) {
