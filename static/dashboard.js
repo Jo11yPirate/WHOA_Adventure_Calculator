@@ -116,24 +116,25 @@ function runRecalculationPipeline() {
   const error = document.getElementById("live-error");
   try {
   const baseAttribute = readNumber("base_attribute");
-    const attackBonus = readNumber("attack_bonus_percentage") / 100;
     const outputBonus = readNumber("bonus_percentage") / 100;
-    const enemyDefense = 0;
-    const penetration = 0;
-    const flatPenetration = readNumber("stat_penetration");
-    const critBonus = 0;
-    const critResistance = 0;
+    const penetrationRating = readNumber("stat_penetration");
+    const hitRating = readNumber("stat_hit");
+    const critRating = readNumber("stat_crit");
+    const skillRate = readNumber("skill_damage_rate_percentage") / 100;
+    const inscriptionLayer = 1 + readNumber("inscription_damage_percentage") / 100;
     const incomingDamage = readOptionalNumber("incoming_damage");
     const damageReduction = Math.min(readNumber("damage_reduction_percentage"), 90) / 100;
     const defenseScore = readNumber("defense_score");
     const defenseBonus = readNumber("defense_bonus_percentage") / 100;
-    const rawOutput = baseAttribute * (1 + attackBonus) * (1 + outputBonus);
-    const effectiveDefense = Math.max(0, enemyDefense * (1 - penetration) - flatPenetration);
-    const mitigation = 1 / (1 + effectiveDefense / 2000);
-    const criticalMultiplier = Math.max(1, 1.5 + critBonus - critResistance);
+    const isHealing = document.getElementById("class-select").value === "Priest";
+    const coreOutput = baseAttribute + penetrationRating + (isHealing ? hitRating : 0);
+    const rawOutput = coreOutput * skillRate * (1 + outputBonus) * inscriptionLayer;
+    const effectiveDefense = 0;
+    const mitigation = 1;
+    const criticalMultiplier = 2;
     const damageReceived = (incomingDamage * (1 - damageReduction)) /
       (1 + defenseScore * defenseBonus);
-    const critEvaluation = effectiveStat("Critical_Rate_Percentage", readNumber("stat_crit"));
+    const critEvaluation = effectiveStat("Critical_Rate_Percentage", critRating);
 
     document.getElementById("res-raw").textContent = format(rawOutput);
     document.getElementById("res-normal").textContent = format(rawOutput * mitigation);
@@ -143,7 +144,7 @@ function runRecalculationPipeline() {
     document.getElementById("log-mitigation").textContent = `×${mitigation.toFixed(3)}`;
     document.getElementById("log-crit-mult").textContent = `×${criticalMultiplier.toFixed(2)} after resistance`;
     document.getElementById("log-mitigation").textContent = "Enemy defense not entered";
-    updateCharts(rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, baseAttribute, effectiveDefense, flatPenetration, outputBonus, enemyDefense, mitigation, incomingDamage, damageReduction, damageReceived);
+    updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, readNumber("stat_defense_rating"), penetrationRating, outputBonus, 0, mitigation, incomingDamage, damageReduction, damageReceived);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;
   } catch (validationError) {
@@ -209,13 +210,4 @@ if (calculatorForm) {
   runRecalculationPipeline();
   updateClassReference(classSelect.value);
   updateWarriorOnly(classSelect.value);
-}
-
-const ascendancyForm = document.getElementById("ascendancy-form");
-if (ascendancyForm) {
-  document.getElementById("clear-asc-stats").addEventListener("click", () => {
-    ascendancyForm.querySelectorAll('input[type="number"]').forEach((input) => {
-      input.value = "";
-    });
-  });
 }

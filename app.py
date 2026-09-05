@@ -74,8 +74,10 @@ FORMULA_GUIDANCE = {
     "Base damage": "ATK + Penetration",
     "Critical rate": "Crit / (ATK + Penetration)",
     "Healing output": "ATK + Penetration + Hit",
-    "Effective defense": "Enemy Defense × (1 − Penetration %) − Flat Penetration",
-    "Critical damage/healing": "Mitigated Output × max(1.0, 1.5 + Crit Damage Bonus % − Target Crit Resistance %)",
+    "Critical damage/healing": "Normal Center Hit × 2.00",
+    "Damage bonus": "1 + Damage Bonus %",
+    "Inscription layer": "1 + Inscription Damage %",
+    "Floating output": "Observed in-game; exact range pending",
     "Tank damage received": "Incoming Boss Damage × (1 − min(DMG Red %, 90%)) / [1 + (Defense Score × Defense Bonus %)]",
 }
 
@@ -224,6 +226,12 @@ def calculate_ascendancy(values):
         "normal_center_hit": normal_center_hit,
         "critical_center_hit": critical_center_hit,
         "critical_rate": critical_rate,
+        "raw_output": normal_center_hit,
+        "mitigated_output": normal_center_hit,
+        "critical_output": critical_center_hit,
+        "critical_multiplier": 2.0,
+        "damage_received": 0.0,
+        "damage_reduction_applied": 0.0,
     }
 
 
@@ -273,6 +281,8 @@ def read_universal(form):
         "evasion_bonus_percentage",
         "penetration_bonus_percentage",
         "bonus_percentage",
+        "skill_damage_rate_percentage",
+        "inscription_damage_percentage",
         "incoming_damage",
         "damage_reduction_percentage",
         "defense_score",
@@ -284,12 +294,19 @@ def read_universal(form):
         if value is None or value < 0:
             raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
         values[field] = value
-    values["penetration_percentage"] = 0.0
-    values["flat_penetration"] = values["stat_penetration"]
-    values["crit_damage_bonus_percentage"] = 0.0
-    values["target_crit_resistance_percentage"] = 0.0
-    values["enemy_defense"] = 0.0
-    return calculate_universal(values)
+    values["attack"] = values["base_attribute"]
+    values["penetration"] = values["stat_penetration"]
+    values["hit"] = values["stat_hit"]
+    values["crit"] = values["stat_crit"]
+    values["damage_bonus_percentage"] = values["bonus_percentage"]
+    result = calculate_ascendancy(values)
+    damage_reduction = min(values["damage_reduction_percentage"], 90) / 100
+    result["damage_reduction_applied"] = damage_reduction * 100
+    result["damage_received"] = (
+        values["incoming_damage"] * (1 - damage_reduction)
+        / (1 + values["defense_score"] * values["defense_bonus_percentage"] / 100)
+    )
+    return result
 
 
 def read_ascendancy(form):
@@ -310,7 +327,6 @@ def read_ascendancy(form):
 @app.route("/", methods=["GET", "POST"])
 def index():
     stats = None
-    asc_stats = None
     error = None
     selected_class = request.values.get("class_name", "Assassin")
     calculator = request.values.get("calculator", "universal")
@@ -318,8 +334,6 @@ def index():
         try:
             if calculator == "universal":
                 stats = read_universal(request.form)
-            elif calculator == "ascendancy":
-                asc_stats = read_ascendancy(request.form)
             else:
                 stats = read_stats(request.form)
         except ValueError as exc:
@@ -327,7 +341,6 @@ def index():
     return render_template(
         "index.html",
         stats=stats,
-        asc_stats=asc_stats,
         error=error,
         guidance=BUILD_GUIDANCE,
         class_guidance=CLASS_GUIDANCE,
