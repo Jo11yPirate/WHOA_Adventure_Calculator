@@ -39,7 +39,6 @@ The verified models are based on the ASCENDANCY Combat Lab workbook:
 - Critical damage and healing: `Normal Output × 2`
 - Damage bonus: direct multiplier, `1 + Damage Bonus%`
 - Tested damage center: `(Attack + Pen) × Skill Rate × Damage Bonus × Inscription Layer`
-- Floating damage and healing exist, but their exact range remains unknown.
 
 Attack, Crit, Penetration, and Hit bonus percentages strengthen flat stat gains;
 they do not directly multiply final damage. Artifacts, pets, temporary buffs,

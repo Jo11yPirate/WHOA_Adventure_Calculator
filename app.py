@@ -77,7 +77,6 @@ FORMULA_GUIDANCE = {
     "Critical damage/healing": "Normal Center Hit × 2.00",
     "Damage bonus": "1 + Damage Bonus %",
     "Hit percentage (AI-generated approximation)": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
-    "Floating output": "Observed in-game; exact range pending",
     "Tank damage received": "Incoming Boss Damage × (1 − min(DMG Red %, 90%)) / [1 + (Defense Score × Defense Bonus %)]",
 }
 
@@ -89,7 +88,6 @@ ASCENDANCY_FORMULAS = {
     "Damage bonus multiplier": "1 + Damage Bonus %",
     "Normal center hit": "(Attack + Pen) × Damage Bonus",
     "Critical center hit": "Normal Center Hit × 2.00",
-    "Floating output": "Observed for damage and healing; exact range pending",
 }
 
 SKILLS = {

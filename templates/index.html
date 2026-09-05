@@ -92,8 +92,8 @@
           </div>
           <input type="hidden" name="calculator" value="universal">
           <div class="form-actions">
-            <button type="submit">CALCULATE AUTHORITATIVE STATS <span aria-hidden="true">→</span></button>
-            <button id="clear-stats" type="button" class="secondary-button">CLEAR ALL STATS</button>
+            <button type="submit">Calculate Authoritative Stats <span aria-hidden="true">→</span></button>
+            <button id="clear-stats" type="button" class="secondary-button">Clear All Stats</button>
           </div>
         </form>
       </section>
@@ -104,36 +104,36 @@
         <section class="results">
           {% if stats %}
             <div class="section-heading">
-              <span class="calculator-status">READY</span>
+              <span class="calculator-status">Ready</span>
             </div>
             <div class="calculator-screen">
-              <div class="screen-topline"><span>BASE STATS</span><span id="screen-mode">LIVE</span></div>
+              <div class="screen-topline"><span>Base Stats</span><span id="screen-mode">Live</span></div>
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
                 <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
                 <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
-                <div class="screen-equation">NORMAL <strong id="screen-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong></div>
-                <div class="screen-equation">CRIT&nbsp;&nbsp; <strong id="screen-critical">{{ "{:,.0f}".format(stats.critical_output) }}</strong></div>
+                <div class="screen-equation">Normal <strong id="screen-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong></div>
+                <div class="screen-equation">Crit&nbsp;&nbsp; <strong id="screen-critical">{{ "{:,.0f}".format(stats.critical_output) }}</strong></div>
                 <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
                   <path d="M40 12V126H500" class="graph-axis"></path>
                   <path d="M40 42H500M40 84H500" class="graph-grid"></path>
                   <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
                   <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
-                  <text x="137" y="143" class="graph-label">NORMAL</text>
-                  <text x="315" y="143" class="graph-label">CRIT</text>
+                  <text x="137" y="143" class="graph-label">Normal</text>
+                  <text x="315" y="143" class="graph-label">Crit</text>
                 </svg>
               </div>
               <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
-                <div class="screen-equation">ATTACK <strong id="screen-attack">0</strong></div>
-                <div class="screen-equation">PEN&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
-                <div class="screen-equation">BONUS&nbsp; <strong id="screen-bonus">0%</strong></div>
+                <div class="screen-equation">Attack <strong id="screen-attack">0</strong></div>
+                <div class="screen-equation">Pen&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
+                <div class="screen-equation">Bonus&nbsp; <strong id="screen-bonus">0%</strong></div>
               </div>
               <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
-                <div class="screen-equation">INCOMING <strong id="screen-incoming">0</strong></div>
-                <div class="screen-equation">DMG RED&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
-                <div class="screen-equation">TAKEN&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
+                <div class="screen-equation">Incoming <strong id="screen-incoming">0</strong></div>
+                <div class="screen-equation">Dmg Red&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
+                <div class="screen-equation">Taken&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
               </div>
             </div>
             <div class="metric-grid">
@@ -170,36 +170,36 @@
           {% else %}
             <div class="section-heading">
               <div><p class="eyebrow">Base stats mode</p></div>
-              <span class="calculator-status">READY</span>
+              <span class="calculator-status">Ready</span>
             </div>
             <div class="calculator-screen">
-              <div class="screen-topline"><span>BASE STATS</span><span id="screen-mode">LIVE</span></div>
+              <div class="screen-topline"><span>Base Stats</span><span id="screen-mode">Live</span></div>
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
                 <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
                 <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
-                <div class="screen-equation">NORMAL <strong id="screen-normal">0</strong></div>
-                <div class="screen-equation">CRIT&nbsp;&nbsp; <strong id="screen-critical">0</strong></div>
+                <div class="screen-equation">Normal <strong id="screen-normal">0</strong></div>
+                <div class="screen-equation">Crit&nbsp;&nbsp; <strong id="screen-critical">0</strong></div>
                 <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
                   <path d="M40 12V126H500" class="graph-axis"></path>
                   <path d="M40 42H500M40 84H500" class="graph-grid"></path>
                   <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
                   <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
-                  <text x="137" y="143" class="graph-label">NORMAL</text>
-                  <text x="315" y="143" class="graph-label">CRIT</text>
+                  <text x="137" y="143" class="graph-label">Normal</text>
+                  <text x="315" y="143" class="graph-label">Crit</text>
                 </svg>
               </div>
               <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
-                <div class="screen-equation">ATTACK <strong id="screen-attack">0</strong></div>
-                <div class="screen-equation">PEN&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
-                <div class="screen-equation">BONUS&nbsp; <strong id="screen-bonus">0%</strong></div>
+                <div class="screen-equation">Attack <strong id="screen-attack">0</strong></div>
+                <div class="screen-equation">Pen&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
+                <div class="screen-equation">Bonus&nbsp; <strong id="screen-bonus">0%</strong></div>
               </div>
               <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
-                <div class="screen-equation">INCOMING <strong id="screen-incoming">0</strong></div>
-                <div class="screen-equation">DMG RED&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
-                <div class="screen-equation">TAKEN&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
+                <div class="screen-equation">Incoming <strong id="screen-incoming">0</strong></div>
+                <div class="screen-equation">Dmg Red&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
+                <div class="screen-equation">Taken&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
               </div>
             </div>
             <div class="metric-grid">

@@ -369,7 +369,7 @@ button {
   font-family: inherit;
   font-weight: 800;
   letter-spacing: .12em;
-  text-transform: uppercase;
+  text-transform: none;
   padding: 7px 12px;
 }
 
@@ -816,7 +816,7 @@ code {
   font-size: 10px;
   letter-spacing: .05em;
   text-decoration: none;
-  text-transform: uppercase;
+  text-transform: none;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 -3px 0 #0b0a09, 0 6px 14px rgba(0, 0, 0, .28);
   transform: translateY(0);
   transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease;
