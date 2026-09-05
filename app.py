@@ -368,6 +368,8 @@ def read_ascendancy(form):
     values = {"class_name": class_name}
     for field in fields:
         value = form.get(field, type=float)
+        if field == "skill_damage_rate_percentage" and value is None:
+            value = 100.0
         if value is None or value < 0:
             raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
         values[field] = value

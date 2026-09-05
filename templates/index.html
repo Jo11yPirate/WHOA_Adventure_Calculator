@@ -62,13 +62,16 @@
                 ("penetration_bonus_percentage", "Penetration Bonus %", "Percent that strengthens flat Penetration gains."),
                 ("defense_bonus_percentage", "Defense Bonus %", "Percent that strengthens flat Defense gains."),
                 ("bonus_percentage", "Damage Bonus %", "Direct damage or healing multiplier bonus."),
-                ("skill_damage_rate_percentage", "Skill Damage Rate %", "Enter the skill tooltip rate, such as 343."),
+                ("skill_damage_rate_percentage", "Skill Damage Rate %", "Optional: leave at 100% for a basic attack, or enter the skill tooltip rate."),
                 ("inscription_damage_percentage", "Inscription Damage %", "Passive inscription damage layer."),
                 ("damage_reduction_percentage", "Damage Reduction %", "Percent of incoming damage reduced; capped at 90%.")
               ] %}
                 <div>
                   <label for="{{ field }}" title="{{ tip }}">{{ label }}</label>
-                  <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}" required>
+                  <div class="{{ 'inline-input-hint' if field == 'skill_damage_rate_percentage' else '' }}">
+                    <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '100') if field == 'skill_damage_rate_percentage' else request.form.get(field, '') }}" title="{{ tip }}" {{ '' if field == 'skill_damage_rate_percentage' else 'required' }}>
+                    {% if field == 'skill_damage_rate_percentage' %}<small>100% = basic attack</small>{% endif %}
+                  </div>
                 </div>
               {% endfor %}
             </div>

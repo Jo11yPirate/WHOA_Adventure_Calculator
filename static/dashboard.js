@@ -19,7 +19,7 @@ function effectiveStat(statName, rawValue) {
 
 function readNumber(id) {
   const input = document.getElementById(id);
-  const value = Number(input.value);
+  const value = input.value === "" && id === "skill_damage_rate_percentage" ? 100 : Number(input.value);
   if (!Number.isFinite(value) || value < 0) {
     throw new Error(`${input.labels[0].textContent} must be 0 or greater.`);
   }
@@ -259,6 +259,7 @@ if (calculatorForm) {
   const clearStatsButton = document.getElementById("clear-stats");
   restoreCalculatorState(calculatorForm, classSelect);
   clearStatsButton.addEventListener("click", () => {
+    if (!window.confirm("Clear all entered stats? This cannot be undone.")) return;
     calculatorForm.querySelectorAll('input[type="number"]').forEach((input) => {
       input.value = "";
     });
