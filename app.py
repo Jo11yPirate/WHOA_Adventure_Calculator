@@ -76,6 +76,7 @@ FORMULA_GUIDANCE = {
     "Healing output": "ATK + Penetration + Hit",
     "Critical damage/healing": "Normal Center Hit × 2.00",
     "Damage bonus": "1 + Damage Bonus %",
+    "Estimated accuracy (AI-generated approximation)": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
     "Floating output": "Observed in-game; exact range pending",
     "Tank damage received": "Incoming Boss Damage × (1 − min(DMG Red %, 90%)) / [1 + (Defense Score × Defense Bonus %)]",
 }
@@ -212,6 +213,7 @@ def calculate_ascendancy(values):
     normal_center_hit = core_output * damage_bonus_multiplier
     critical_center_hit = normal_center_hit * 2
     critical_rate = (crit / core_output * 100) if core_output else 0
+    estimated_accuracy = min(100, hit)
     result = {
         **values,
         "is_healing": is_healing,
@@ -222,6 +224,7 @@ def calculate_ascendancy(values):
         "normal_center_hit": normal_center_hit,
         "critical_center_hit": critical_center_hit,
         "critical_rate": critical_rate,
+        "estimated_accuracy": estimated_accuracy,
         "raw_output": normal_center_hit,
         "mitigated_output": normal_center_hit,
         "critical_output": critical_center_hit,
