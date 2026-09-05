@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Whoa Adventure Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='dashboard.js') }}" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section id="calculator-page" class="app-page is-page-active" data-app-page="calculator">
+      <section class="hero">
+        <p class="eyebrow">Whoa Adventure · universal tools</p>
+        <p class="notice"><strong>Formula source:</strong> ASCENDANCY Combat Lab models marked verified are treated as authoritative; other estimates may differ from live combat.</p>
+      </section>
+
+      <section class="content-grid">
+        <form id="calculator" class="card stats-form" method="post">
+          {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+          <p id="live-error" class="error" role="alert" hidden></p>
+
+          <label for="class-select" title="Choose the class whose base stats you are entering.">Class</label>
+          <select id="class-select" name="class_name" title="Choose your character class.">
+            {% for class_name in skills %}
+              <option value="{{ class_name }}" {% if selected_class == class_name %}selected{% endif %}>{{ class_name }}</option>
+            {% endfor %}
+          </select>
+
+          <div class="form-row">
+            {% for field, label, tip in [
+              ("base_attribute", "Base attribute", "Your raw Attack or Magic ATK value."),
+              ("attack_bonus_percentage", "Attack bonus %", "Percent that strengthens flat Attack gains."),
+              ("bonus_percentage", "Damage / healing bonus %", "Direct damage or healing multiplier bonus."),
+              ("enemy_defense", "Enemy defense", "Target defense before penetration."),
+              ("penetration_percentage", "Penetration %", "Percent of enemy defense ignored."),
+              ("flat_penetration", "Flat penetration", "Flat defense ignored after percent penetration."),
+              ("crit_damage_bonus_percentage", "Crit damage bonus %", "Extra critical multiplier bonus."),
+              ("target_crit_resistance_percentage", "Target Crit Resistance %", "Target reduction to critical damage."),
+              ("incoming_damage", "Incoming boss damage", "Damage received before your defenses."),
+              ("damage_reduction_percentage", "DMG reduction %", "Percent of incoming damage reduced; capped at 90%."),
+              ("defense_score", "Defense score", "Your total defensive score."),
+              ("defense_bonus_percentage", "Defense bonus %", "Percent bonus applied to defense."),
+              ("stat_penetration", "Build penetration rating", "Your displayed flat Penetration stat."),
+              ("stat_crit", "Build crit rating", "Your displayed Crit stat."),
+              ("stat_hit", "Build hit rating", "Your displayed Hit or Accuracy stat."),
+              ("stat_hp", "Build HP", "Your displayed maximum HP."),
+              ("stat_evasion", "Build evasion", "Your displayed Evasion stat."),
+              ("stat_crit_resistance", "Build Crit RES", "Your displayed critical resistance stat.")
+            ] %}
+              <div class="{{ 'warrior-only' if field in ('incoming_damage', 'damage_reduction_percentage', 'defense_score', 'defense_bonus_percentage') else '' }}">
+                <label for="{{ field }}" title="{{ tip }}">{{ label }}</label>
+                <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}" required>
+              </div>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="calculator" value="universal">
+          <div class="form-actions">
+            <button type="submit">CALCULATE BASE STATS <span aria-hidden="true">→</span></button>
+            <button id="clear-stats" type="button" class="secondary-button">CLEAR ALL STATS</button>
+          </div>
+        </form>
+      </section>
+      </section>
+
+      <section id="visualization" class="app-page card calculator-window visualization-page" data-app-page="visualization">
+        <div class="visualization-layout">
+        <section class="results">
+          {% if stats %}
+            <div class="section-heading">
+              <span class="calculator-status">READY</span>
+            </div>
+            <div class="calculator-screen">
+              <div class="screen-topline"><span>BASE STATS</span><span id="screen-mode">LIVE</span></div>
+              <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
+                <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
+                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
+                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="defense">Defense</button>
+                <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
+              </div>
+              <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
+                <div class="screen-equation">NORMAL <strong id="screen-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong></div>
+                <div class="screen-equation">CRIT&nbsp;&nbsp; <strong id="screen-critical">{{ "{:,.0f}".format(stats.critical_output) }}</strong></div>
+                <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
+                  <path d="M40 12V126H500" class="graph-axis"></path>
+                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                  <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
+                  <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
+                  <text x="137" y="143" class="graph-label">NORMAL</text>
+                  <text x="315" y="143" class="graph-label">CRIT</text>
+                </svg>
+              </div>
+              <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
+                <div class="screen-equation">ATTACK <strong id="screen-attack">0</strong></div>
+                <div class="screen-equation">PEN&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
+                <div class="screen-equation">BONUS&nbsp; <strong id="screen-bonus">0%</strong></div>
+              </div>
+              <div class="screen-panel" data-screen-panel="defense" role="tabpanel" hidden>
+                <div class="screen-equation">ENEMY DEF <strong id="screen-enemy-defense">0</strong></div>
+                <div class="screen-equation">EFFECTIVE <strong id="screen-effective-defense">0</strong></div>
+                <div class="screen-equation">MITIGATION <strong id="screen-mitigation">×1.000</strong></div>
+              </div>
+              <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
+                <div class="screen-equation">INCOMING <strong id="screen-incoming">0</strong></div>
+                <div class="screen-equation">DMG RED&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
+                <div class="screen-equation">TAKEN&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <article class="metric"><span>Raw output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Before defense</small></article>
+              <article class="metric"><span>After mitigation</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">×{{ "%.3f"|format(stats.mitigation_multiplier) }}</small></article>
+              <article class="metric"><span>Critical output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
+              <article class="metric"><span>Effective defense</span><strong id="res-defense">{{ "{:,.0f}".format(stats.effective_defense) }}</strong><small id="log-eff-def">After penetration</small></article>
+            </div>
+            <div class="recommendation warrior-only">
+              <p class="eyebrow">Tank result</p>
+              <p>Estimated damage received: <strong id="res-tank">{{ "{:,.0f}".format(stats.damage_received) }}</strong></p>
+              <p>Applied DMG Reduction: <strong>{{ "%.1f"|format(stats.damage_reduction_applied) }}%</strong> (90% internal cap)</p>
+              {% if stats.combo_output is defined %}<p>Full {{ stats.hit_count }}-hit combo: <strong>{{ "{:,.1f}".format(stats.combo_output) }}</strong></p>{% endif %}
+              {% if stats.life_steal_yield is defined %}<p>Estimated life-steal yield: <strong>{{ "{:,.1f}".format(stats.life_steal_yield) }}</strong></p>{% endif %}
+              <p class="muted">This uses the mitigation equation shown below.</p>
+            </div>
+          {% else %}
+            <div class="section-heading">
+              <div><p class="eyebrow">Base stats mode</p></div>
+              <span class="calculator-status">READY</span>
+            </div>
+            <div class="calculator-screen">
+              <div class="screen-topline"><span>BASE STATS</span><span id="screen-mode">LIVE</span></div>
+              <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
+                <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
+                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
+                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="defense">Defense</button>
+                <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
+              </div>
+              <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
+                <div class="screen-equation">NORMAL <strong id="screen-normal">0</strong></div>
+                <div class="screen-equation">CRIT&nbsp;&nbsp; <strong id="screen-critical">0</strong></div>
+                <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
+                  <path d="M40 12V126H500" class="graph-axis"></path>
+                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                  <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
+                  <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
+                  <text x="137" y="143" class="graph-label">NORMAL</text>
+                  <text x="315" y="143" class="graph-label">CRIT</text>
+                </svg>
+              </div>
+              <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
+                <div class="screen-equation">ATTACK <strong id="screen-attack">0</strong></div>
+                <div class="screen-equation">PEN&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
+                <div class="screen-equation">BONUS&nbsp; <strong id="screen-bonus">0%</strong></div>
+              </div>
+              <div class="screen-panel" data-screen-panel="defense" role="tabpanel" hidden>
+                <div class="screen-equation">ENEMY DEF <strong id="screen-enemy-defense">0</strong></div>
+                <div class="screen-equation">EFFECTIVE <strong id="screen-effective-defense">0</strong></div>
+                <div class="screen-equation">MITIGATION <strong id="screen-mitigation">×1.000</strong></div>
+              </div>
+              <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
+                <div class="screen-equation">INCOMING <strong id="screen-incoming">0</strong></div>
+                <div class="screen-equation">DMG RED&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
+                <div class="screen-equation">TAKEN&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <article class="metric"><span>Raw output</span><strong id="res-raw">0</strong><small>Before defense</small></article>
+              <article class="metric"><span>After mitigation</span><strong id="res-normal">0</strong><small id="log-mitigation">×1.000</small></article>
+              <article class="metric"><span>Critical output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
+              <article class="metric"><span>Effective defense</span><strong id="res-defense">0</strong><small id="log-eff-def">After penetration</small></article>
+            </div>
+            <div class="recommendation warrior-only">
+              <p class="eyebrow">Tank result</p>
+              <p>Estimated damage received: <strong id="res-tank">0</strong></p>
+              <p class="muted">Values update as you edit the inputs. Submit the form to validate them on the server.</p>
+            </div>
+          {% endif %}
+        </section>
+        <section class="visualization-summary">
+          <div class="section-heading">
+            <div><p class="eyebrow">At-a-glance analysis</p></div>
+            <span class="pill">Live chart</span>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-card">
+              <h3>Output comparison</h3>
+              <div class="bar-chart" aria-label="Output comparison chart">
+                <div class="bar-row"><span>Normal</span><div class="bar-track"><i id="bar-normal"></i></div><strong id="bar-normal-value">0</strong></div>
+                <div class="bar-row"><span>Critical</span><div class="bar-track"><i id="bar-critical"></i></div><strong id="bar-critical-value">0</strong></div>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h3>Combat profile</h3>
+              <div class="bar-chart" aria-label="Combat profile chart">
+                <div class="bar-row"><span>Attack</span><div class="bar-track"><i id="bar-attack"></i></div><strong id="bar-attack-value">0</strong></div>
+                <div class="bar-row"><span>Defense</span><div class="bar-track"><i id="bar-defense"></i></div><strong id="bar-defense-value">0</strong></div>
+                <div class="bar-row"><span>Penetration</span><div class="bar-track"><i id="bar-penetration"></i></div><strong id="bar-penetration-value">0</strong></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        </div>
+      </section>
+
+      <section id="reference" class="app-page card guide" data-app-page="reference">
+        <div class="section-heading"><div><p class="eyebrow">Class reference</p><h2>Build priorities</h2></div></div>
+        <div class="guide-grid">
+          {% for class_name, profile in class_profiles.items() %}
+            <div class="class-reference" data-reference-class="{{ class_name }}" {% if class_name != selected_class %}hidden{% endif %}>
+              <strong>{{ class_name }}</strong>
+              <span>{{ class_guidance[class_name] }}</span>
+              <span><b>Gems:</b> {{ profile.gems }}</span>
+              <span><b>Refinement:</b> {{ profile.refinement }}</span>
+              <span><b>Focus:</b> {{ profile.notable }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="formula-guide">
+          <div class="section-heading"><div><p class="eyebrow">Formula guide</p><h2>Reference equations</h2></div></div>
+          <div class="formula-list">
+            {% for name, formula in formula_guidance.items() %}
+              <div class="{{ 'warrior-only' if name == 'Tank damage received' else '' }}"><strong>{{ name }}</strong><code>{{ formula }}</code></div>
+            {% endfor %}
+          </div>
+        </div>
+        <p class="reference-credit">Combat models provided by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.</p>
+      </section>
+    </main>
+    <nav class="quick-nav" aria-label="Quick navigation">
+      <a href="#calculator-page" data-page-target="calculator"><span aria-hidden="true">▣</span><span>Calculator</span></a>
+      <a href="#visualization" data-page-target="visualization"><span aria-hidden="true">▥</span><span>Visualization</span></a>
+      <a href="#reference" data-page-target="reference"><span aria-hidden="true">?</span><span>Reference</span></a>
+    </nav>
+  </body>
+</html>

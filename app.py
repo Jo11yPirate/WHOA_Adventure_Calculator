@@ -1,0 +1,263 @@
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+DIMINISHING_RETURNS_CONFIG = {
+    "affected_stats": {
+        "Critical_Rate_Percentage",
+        "Evasion_Percentage",
+        "Cooldown_Reduction_Percentage",
+    },
+    "unaffected_stats": {
+        "Physical_Attack",
+        "Magic_Attack",
+        "Defense",
+        "HP",
+    },
+    "threshold": 5000.0,
+    "coefficient": 0.0002,
+}
+
+BUILD_GUIDANCE = {
+    "Attack/Crit": "Best general DPS and healing balance. Prioritize Attack and Crit, then Hit.",
+    "Hit/Crit": "Healing-focused option. Prioritize Hit and Crit, then Attack.",
+    "Attack/Hit/Crit": "Late-game hybrid. Keep all three healthy and let Penetration accumulate naturally.",
+}
+
+CLASS_GUIDANCE = {
+    "Priest": "Attack/Crit is the general healing and DPS direction. Around 75% healing crit, prioritize Attack > Hit ≈ Crit > Penetration.",
+    "Warrior": "Team/Tank: DMG Reduction → Defense → Defense Bonus → Crit Resistance/Evasion. Solo: Physical ATK → Penetration → Crit Damage.",
+    "Assassin": "Choose Attack-Penetration for high-defense bosses or Attack-Crit for Secret Realm speedfarming. Do not mix the two.",
+    "Archer": "Strength (STR) → Agility (AGI) → Attack Speed (ASPD) → Physical Penetration.",
+    "Mage": "Magic ATK → Cooldown Reduction (CDR) → Magic Penetration.",
+}
+
+CLASS_PROFILES = {
+    "Priest": {
+        "advancements": "Light / Shadow Priest",
+        "base_attribute": "Attack and healing stats",
+        "gems": "Attack + Crit, or Hit + Crit",
+        "refinement": "Crit > Attack > Hit > Penetration",
+        "notable": "Healing crit estimate targets roughly 75%; enemy Crit Resistance may reduce the result.",
+    },
+    "Warrior": {
+        "advancements": "Gladiator / Paladin",
+        "base_attribute": "Physical ATK",
+        "gems": "DMG Red, Defense, and HP for team/tank; physical ATK and Penetration for solo",
+        "refinement": "Prioritize flat DMG Reduction for team/tank builds",
+        "notable": "Earth Strike scales at 280% ATK and stuns for 1.5 seconds; Valor Bastion absorbs 30% Max HP.",
+    },
+    "Assassin": {
+        "advancements": "Night Walker / Ash Envoy",
+        "base_attribute": "Physical ATK",
+        "gems": "Physical ATK + Penetration, or Physical ATK + Crit Damage",
+        "refinement": "Commit to one path; do not split Attack-Penetration and Attack-Crit",
+        "notable": "Shadow Blade scales at 480% ATK and doubles below 30% target HP; Ambush unlocks at level 40.",
+    },
+    "Archer": {
+        "advancements": "Tide Chaser / Wind Walker",
+        "base_attribute": "Physical ATK",
+        "gems": "Physical ATK, Attack Speed, and Penetration",
+        "refinement": "Roll into Attack Speed pools to support projectile loops",
+        "notable": "Piercing Arrow scales at 350% ATK and reduces armor by 20%; Arrow Rain fires 8 waves at 45% ATK each.",
+    },
+    "Mage": {
+        "advancements": "Advancement names not confirmed",
+        "base_attribute": "Magic ATK",
+        "gems": "Magic ATK, CDR, and Magic Penetration",
+        "refinement": "Prioritize Cooldown Reduction for reliable spell loops",
+        "notable": "Astral Comet scales at 420% Magic ATK and applies a 5-second burn; Arcane Overload adds 8% per stack up to 4 stacks.",
+    },
+}
+
+FORMULA_GUIDANCE = {
+    "Base damage": "ATK + Penetration",
+    "Critical rate": "Crit / (ATK + Penetration)",
+    "Healing output": "ATK + Penetration + Hit",
+    "Effective defense": "Enemy Defense × (1 − Penetration %) − Flat Penetration",
+    "Critical damage/healing": "Mitigated Output × max(1.0, 1.5 + Crit Damage Bonus % − Target Crit Resistance %)",
+    "Tank damage received": "Incoming Boss Damage × (1 − min(DMG Red %, 90%)) / [1 + (Defense Score × Defense Bonus %)]",
+}
+
+SKILLS = {
+    "Warrior": {
+        "Earth Strike": (2.80, 0, "damage"),
+    },
+    "Assassin": {
+        "Shadow Blade": (4.80, 0, "damage"),
+    },
+    "Archer": {
+        "Piercing Arrow": (3.50, 0, "damage"),
+        "Arrow Rain": (0.45, 0, "damage"),
+    },
+    "Mage": {
+        "Astral Comet": (4.20, 0, "damage"),
+    },
+    "Priest": {
+        "Sanctifying Light": (2.60, 0, "healing"),
+    },
+}
+
+SKILL_EFFECTS = {
+    ("Archer", "Arrow Rain"): {"hit_count": 8},
+    ("Assassin", "Shadow Blade"): {"execute_threshold": 0.30, "execute_multiplier": 2.0},
+}
+
+
+def calculate_stats(values):
+    attack = values["attack"]
+    hit = values["hit"]
+    penetration = values["penetration"]
+    crit = values["crit"]
+    hit_rate = min(100, (hit / 4057 * 90) if hit < 4057 else 90 + (hit - 4057) / (6000 - 4057) * 10)
+    healing_crit = (crit / (attack + hit + penetration) * 100) if attack + hit + penetration else 0
+
+    return {
+        **values,
+        "hit_rate": hit_rate,
+        "healing_crit": healing_crit,
+        "healing_multiplier": 1 + healing_crit / 100,
+        "hit_target_gap": max(0, 4057 - hit),
+        "healing_target_gap": max(0, 75 - healing_crit),
+    }
+
+
+def calculate_effective_stat(stat_name, raw_value):
+    """Apply the verified diminishing-return curve only to secondary stats."""
+    if stat_name not in DIMINISHING_RETURNS_CONFIG["affected_stats"]:
+        return raw_value
+
+    threshold = DIMINISHING_RETURNS_CONFIG["threshold"]
+    if raw_value <= threshold:
+        return raw_value
+
+    coefficient = DIMINISHING_RETURNS_CONFIG["coefficient"]
+    excess = raw_value - threshold
+    return threshold + excess / (1 + coefficient * excess)
+
+
+def calculate_universal(values):
+    # Keep the function compatible with earlier callers while the web form
+    # reports class-level base output rather than a skill-specific result.
+    skill_scaling, flat_modifier, output_type = (1.0, 0, "damage")
+    if values.get("skill"):
+        skill_scaling, flat_modifier, output_type = SKILLS[values["class_name"]][values["skill"]]
+    base_attribute = values["base_attribute"]
+    attack_bonus = values.get("attack_bonus_percentage", 0) / 100
+    raw_output = (
+        (base_attribute * (1 + attack_bonus) * skill_scaling) + flat_modifier
+    ) * (1 + values["bonus_percentage"] / 100)
+    effective_defense = max(
+        0,
+        values["enemy_defense"] * (1 - values["penetration_percentage"] / 100) - values["flat_penetration"],
+    )
+    mitigation_multiplier = 1 / (1 + effective_defense / 2000)
+    critical_multiplier = max(
+        1.0,
+        1.5
+        + values["crit_damage_bonus_percentage"] / 100
+        - values.get("target_crit_resistance_percentage", 0) / 100,
+    )
+    critical_output = raw_output * mitigation_multiplier * critical_multiplier
+    damage_reduction = min(values["damage_reduction_percentage"], 90) / 100
+    damage_received = (
+        values["incoming_damage"] * (1 - damage_reduction)
+        / (1 + values["defense_score"] * values["defense_bonus_percentage"] / 100)
+    )
+    result = {
+        **values,
+        "skill_scaling": skill_scaling,
+        "flat_modifier": flat_modifier,
+        "output_type": output_type,
+        "raw_output": raw_output,
+        "effective_defense": effective_defense,
+        "mitigation_multiplier": mitigation_multiplier,
+        "mitigated_output": raw_output * mitigation_multiplier,
+        "critical_output": critical_output,
+        "critical_multiplier": critical_multiplier,
+        "damage_reduction_applied": damage_reduction * 100,
+        "damage_received": damage_received,
+    }
+    effects = SKILL_EFFECTS.get((values["class_name"], values["skill"]), {}) if values.get("skill") else {}
+    if "hit_count" in effects:
+        result["hit_count"] = effects["hit_count"]
+        result["combo_output"] = result["mitigated_output"] * effects["hit_count"]
+    if "life_steal_ratio" in effects:
+        result["life_steal_yield"] = result["mitigated_output"] * effects["life_steal_ratio"]
+    return result
+
+
+def read_stats(form):
+    class_name = form.get("class_name", "Priest")
+    if class_name not in CLASS_GUIDANCE:
+        raise ValueError("Choose a valid class.")
+    if class_name != "Priest":
+        return {"class_name": class_name, "formula_available": False}
+
+    build = form.get("build", "Attack/Crit")
+    content = form.get("content", "General progression")
+    values = {"build": build, "content": content, "class_name": class_name, "formula_available": True}
+
+    for field in ("attack", "hit", "penetration", "crit"):
+        value = form.get(field, type=float)
+        if value is None or value < 0:
+            raise ValueError(f"{field.title()} must be 0 or greater.")
+        values[field] = value
+
+    return calculate_stats(values)
+
+
+def read_universal(form):
+    class_name = form.get("class_name", "Warrior")
+    if class_name not in CLASS_GUIDANCE:
+        raise ValueError("Choose a valid class.")
+
+    values = {"class_name": class_name}
+    for field in (
+        "base_attribute",
+        "attack_bonus_percentage",
+        "bonus_percentage",
+        "enemy_defense",
+        "penetration_percentage",
+        "flat_penetration",
+        "crit_damage_bonus_percentage",
+        "target_crit_resistance_percentage",
+        "incoming_damage",
+        "damage_reduction_percentage",
+        "defense_score",
+        "defense_bonus_percentage",
+    ):
+        value = form.get(field, type=float)
+        if value is None or value < 0:
+            raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
+        values[field] = value
+    return calculate_universal(values)
+
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    stats = None
+    error = None
+    selected_class = request.values.get("class_name", "Assassin")
+    calculator = request.values.get("calculator", "universal")
+    if request.method == "POST":
+        try:
+            stats = read_universal(request.form) if calculator == "universal" else read_stats(request.form)
+        except ValueError as exc:
+            error = str(exc)
+    return render_template(
+        "index.html",
+        stats=stats,
+        error=error,
+        guidance=BUILD_GUIDANCE,
+        class_guidance=CLASS_GUIDANCE,
+        selected_class=selected_class,
+        formula_guidance=FORMULA_GUIDANCE,
+        class_profiles=CLASS_PROFILES,
+        skills=SKILLS,
+        calculator=calculator,
+    )
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
