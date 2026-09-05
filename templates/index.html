@@ -137,9 +137,9 @@
               </div>
             </div>
             <div class="metric-grid">
-              <article class="metric"><span>Raw output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
-              <article class="metric"><span>Normal output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Enemy defense not entered</small></article>
-              <article class="metric"><span>Critical output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
+              <article class="metric"><span>Raw Output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
+              <article class="metric"><span>Normal Output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Enemy defense not entered</small></article>
+              <article class="metric"><span>Critical Output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
               <article class="metric"><span>Critical Rate</span><strong id="res-critical-rate">{{ "%.2f"|format(stats.critical_rate) }}%</strong><small>Crit ÷ core output</small></article>
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">{{ "%.2f"|format(stats.estimated_accuracy) }}%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
             </div>
@@ -169,7 +169,7 @@
             </div>
           {% else %}
             <div class="section-heading">
-              <div><p class="eyebrow">Base stats mode</p></div>
+              <div><p class="eyebrow">Base Stats Mode</p></div>
               <span class="calculator-status">Ready</span>
             </div>
             <div class="calculator-screen">
@@ -203,14 +203,14 @@
               </div>
             </div>
             <div class="metric-grid">
-              <article class="metric"><span>Raw output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
-              <article class="metric"><span>Normal output</span><strong id="res-normal">0</strong><small id="log-mitigation">Enemy defense not entered</small></article>
-              <article class="metric"><span>Critical output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
+              <article class="metric"><span>Raw Output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
+              <article class="metric"><span>Normal Output</span><strong id="res-normal">0</strong><small id="log-mitigation">Enemy defense not entered</small></article>
+              <article class="metric"><span>Critical Output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
               <article class="metric"><span>Critical Rate</span><strong id="res-critical-rate">0.00%</strong><small>Crit ÷ core output</small></article>
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">0.00%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
             </div>
             <div class="recommendation warrior-only">
-              <p class="eyebrow">Tank result</p>
+              <p class="eyebrow">Tank Result</p>
               <p>Estimated damage received: <strong id="res-tank">0</strong></p>
               <p class="muted">Values update as you edit the inputs. Submit the form to validate them on the server.</p>
             </div>
@@ -218,19 +218,19 @@
         </section>
         <section class="visualization-summary">
           <div class="section-heading">
-            <div><p class="eyebrow">At-a-glance analysis</p></div>
-            <span class="pill">Live chart</span>
+            <div><p class="eyebrow">At-a-Glance Analysis</p></div>
+            <span class="pill">Live Chart</span>
           </div>
           <div class="chart-grid">
             <div class="chart-card">
-              <h3>Output comparison</h3>
+              <h3>Output Comparison</h3>
               <div class="bar-chart" aria-label="Output comparison chart">
                 <div class="bar-row"><span>Normal</span><div class="bar-track"><i id="bar-normal"></i></div><strong id="bar-normal-value">0</strong></div>
                 <div class="bar-row"><span>Critical</span><div class="bar-track"><i id="bar-critical"></i></div><strong id="bar-critical-value">0</strong></div>
               </div>
             </div>
             <div class="chart-card">
-              <h3>Combat profile</h3>
+              <h3>Combat Profile</h3>
               <div class="bar-chart" aria-label="Combat profile chart">
                 <div class="bar-row"><span>Attack</span><div class="bar-track"><i id="bar-attack"></i></div><strong id="bar-attack-value">0</strong></div>
                 <div class="bar-row"><span>Defense</span><div class="bar-track"><i id="bar-defense"></i></div><strong id="bar-defense-value">0</strong></div>
@@ -243,7 +243,7 @@
       </section>
 
       <section id="reference" class="app-page card guide" data-app-page="reference">
-        <div class="section-heading"><div><p class="eyebrow">Class reference</p><h2>Build priorities</h2></div></div>
+        <div class="section-heading"><div><p class="eyebrow">Class Reference</p><h2>Build Priorities</h2></div></div>
         <div class="guide-grid">
           {% for class_name, profile in class_profiles.items() %}
             <div class="class-reference" data-reference-class="{{ class_name }}" {% if class_name != selected_class %}hidden{% endif %}>
@@ -256,7 +256,7 @@
           {% endfor %}
         </div>
         <div class="formula-guide">
-          <div class="section-heading"><div><p class="eyebrow">Formula guide</p></div></div>
+          <div class="section-heading"><div><p class="eyebrow">Formula Guide</p></div></div>
           <div class="formula-list">
             {% for name, formula in formula_guidance.items() %}
               <div class="{{ 'warrior-only' if name == 'Tank damage received' else '' }}"><strong>{{ name }}</strong><code>{{ formula }}</code></div>
@@ -264,7 +264,7 @@
           </div>
         </div>
         <div class="formula-guide">
-          <div class="section-heading"><div><p class="eyebrow">ASCENDANCY Combat Lab</p><h2>Verified model equations</h2></div></div>
+          <div class="section-heading"><div><p class="eyebrow">ASCENDANCY Combat Lab</p><h2>Verified Model Equations</h2></div></div>
           <div class="formula-list">
             {% for name, formula in ascendancy_formulas.items() %}
               <div><strong>{{ name }}</strong><code>{{ formula }}</code></div>
