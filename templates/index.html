@@ -254,7 +254,7 @@
           {% endfor %}
         </div>
         <div class="formula-guide">
-          <div class="section-heading"><div><p class="eyebrow">Formula guide</p><h2>Reference equations</h2></div></div>
+          <div class="section-heading"><div><p class="eyebrow">Formula guide</p><h2>Equations</h2></div></div>
           <div class="formula-list">
             {% for name, formula in formula_guidance.items() %}
               <div class="{{ 'warrior-only' if name == 'Tank damage received' else '' }}"><strong>{{ name }}</strong><code>{{ formula }}</code></div>
