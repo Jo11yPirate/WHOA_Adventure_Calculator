@@ -48,9 +48,8 @@ and extra proc layers are outside the current model.
 Combat models provided by **Noblesse's ASCENDANCY Combat Lab**.
 
 The calculator uses `Attack + Penetration` for damage,
-`Attack + Penetration + Hit` for Priest healing, the entered skill rate,
-Damage Bonus %, Inscription Damage %, and a fixed `×2.00` critical center hit.
-Skill Damage Rate % defaults to `100%`, which represents a basic attack.
+`Attack + Penetration + Hit` for Priest healing, Damage Bonus %, and a
+fixed `×2.00` critical center hit.
 
 ## Tests
 

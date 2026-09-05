@@ -115,13 +115,11 @@ class AscendancyCalculatorTests(unittest.TestCase):
             "hit": 50.0,
             "crit": 300.0,
             "damage_bonus_percentage": 25.0,
-            "skill_damage_rate_percentage": 200.0,
-            "inscription_damage_percentage": 10.0,
         })
 
         self.assertEqual(result["base_damage"], 1200.0)
-        self.assertAlmostEqual(result["normal_center_hit"], 3300.0)
-        self.assertAlmostEqual(result["critical_center_hit"], 6600.0)
+        self.assertAlmostEqual(result["normal_center_hit"], 1500.0)
+        self.assertAlmostEqual(result["critical_center_hit"], 3000.0)
         self.assertAlmostEqual(result["critical_rate"], 25.0)
 
     def test_priest_uses_attack_penetration_and_hit_for_healing(self):
@@ -132,8 +130,6 @@ class AscendancyCalculatorTests(unittest.TestCase):
             "hit": 300.0,
             "crit": 150.0,
             "damage_bonus_percentage": 0.0,
-            "skill_damage_rate_percentage": 100.0,
-            "inscription_damage_percentage": 0.0,
         })
 
         self.assertTrue(result["is_healing"])

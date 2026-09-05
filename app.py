@@ -76,7 +76,6 @@ FORMULA_GUIDANCE = {
     "Healing output": "ATK + Penetration + Hit",
     "Critical damage/healing": "Normal Center Hit × 2.00",
     "Damage bonus": "1 + Damage Bonus %",
-    "Inscription layer": "1 + Inscription Damage %",
     "Floating output": "Observed in-game; exact range pending",
     "Tank damage received": "Incoming Boss Damage × (1 − min(DMG Red %, 90%)) / [1 + (Defense Score × Defense Bonus %)]",
 }
@@ -87,7 +86,7 @@ ASCENDANCY_FORMULAS = {
     "Critical rate": "Crit / (Attack + Penetration)",
     "Healing critical rate": "Crit / Base Healing",
     "Damage bonus multiplier": "1 + Damage Bonus %",
-    "Normal center hit": "(Attack + Pen) × Skill Rate × Damage Bonus × Inscription Layer",
+    "Normal center hit": "(Attack + Pen) × Damage Bonus",
     "Critical center hit": "Normal Center Hit × 2.00",
     "Floating output": "Observed for damage and healing; exact range pending",
 }
@@ -206,13 +205,11 @@ def calculate_ascendancy(values):
     hit = values["hit"]
     crit = values["crit"]
     damage_bonus_multiplier = 1 + values["damage_bonus_percentage"] / 100
-    inscription_layer = 1 + values["inscription_damage_percentage"] / 100
     base_damage = attack + penetration
     base_healing = base_damage + hit
     is_healing = values["class_name"] == "Priest"
     core_output = base_healing if is_healing else base_damage
-    skill_rate = values["skill_damage_rate_percentage"] / 100
-    normal_center_hit = core_output * skill_rate * damage_bonus_multiplier * inscription_layer
+    normal_center_hit = core_output * damage_bonus_multiplier
     critical_center_hit = normal_center_hit * 2
     critical_rate = (crit / core_output * 100) if core_output else 0
     result = {
@@ -222,7 +219,6 @@ def calculate_ascendancy(values):
         "base_healing": base_healing,
         "core_output": core_output,
         "damage_bonus_multiplier": damage_bonus_multiplier,
-        "inscription_layer": inscription_layer,
         "normal_center_hit": normal_center_hit,
         "critical_center_hit": critical_center_hit,
         "critical_rate": critical_rate,
@@ -319,8 +315,6 @@ def read_universal(form):
         "evasion_bonus_percentage",
         "penetration_bonus_percentage",
         "bonus_percentage",
-        "skill_damage_rate_percentage",
-        "inscription_damage_percentage",
         "incoming_damage",
         "damage_reduction_percentage",
         "defense_score",
@@ -363,13 +357,10 @@ def read_ascendancy(form):
     class_name = form.get("class_name", "Assassin")
     if class_name not in CLASS_GUIDANCE:
         raise ValueError("Choose a valid class.")
-    fields = ("attack", "penetration", "hit", "crit", "damage_bonus_percentage",
-              "skill_damage_rate_percentage", "inscription_damage_percentage")
+    fields = ("attack", "penetration", "hit", "crit", "damage_bonus_percentage")
     values = {"class_name": class_name}
     for field in fields:
         value = form.get(field, type=float)
-        if field == "skill_damage_rate_percentage" and value is None:
-            value = 100.0
         if value is None or value < 0:
             raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
         values[field] = value

@@ -19,7 +19,7 @@ function effectiveStat(statName, rawValue) {
 
 function readNumber(id) {
   const input = document.getElementById(id);
-  const value = input.value === "" && id === "skill_damage_rate_percentage" ? 100 : Number(input.value);
+  const value = Number(input.value);
   if (!Number.isFinite(value) || value < 0) {
     throw new Error(`${input.labels[0].textContent} must be 0 or greater.`);
   }
@@ -148,8 +148,6 @@ function runRecalculationPipeline() {
     const penetrationRating = readNumber("stat_penetration");
     const hitRating = readNumber("stat_hit");
     const critRating = readNumber("stat_crit");
-    const skillRate = readNumber("skill_damage_rate_percentage") / 100;
-    const inscriptionLayer = 1 + readNumber("inscription_damage_percentage") / 100;
     const incomingDamage = readOptionalNumber("incoming_damage");
     const damageReduction = Math.min(readNumber("damage_reduction_percentage"), 90) / 100;
     const defenseScore = readNumber("defense_score");
@@ -178,7 +176,7 @@ function runRecalculationPipeline() {
     const upgradedEffectiveHp = (hp + upgradeHp) / (1 - upgradedDamageReduction / 100);
     const isHealing = document.getElementById("class-select").value === "Priest";
     const coreOutput = baseAttribute + penetrationRating + (isHealing ? hitRating : 0);
-    const rawOutput = coreOutput * skillRate * (1 + outputBonus) * inscriptionLayer;
+    const rawOutput = coreOutput * (1 + outputBonus);
     const effectiveDefense = 0;
     const mitigation = 1;
     const criticalMultiplier = 2;
