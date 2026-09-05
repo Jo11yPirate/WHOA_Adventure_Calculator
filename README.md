@@ -20,7 +20,8 @@ Open <http://127.0.0.1:5000> in a browser.
 2. Enter the displayed in-game stats.
 3. Use the calculator and visualization tabs to review results.
 4. Use **CLEAR ALL STATS** to reset every numeric field.
-5. Open the Reference tab for class guidance and formula notes.
+5. Use the **ASCENDANCY** tab for Noblesse's verified center-hit model.
+6. Open the Reference tab for class guidance and formula notes.
 
 Warrior-only fields and survivability results appear when Warrior is selected.
 The calculator also provides concise hover/focus tooltips for its inputs.
@@ -45,6 +46,10 @@ they do not directly multiply final damage. Artifacts, pets, temporary buffs,
 and extra proc layers are outside the current model.
 
 Combat models provided by **Noblesse's ASCENDANCY Combat Lab**.
+
+The ASCENDANCY calculator uses `Attack + Penetration` for damage,
+`Attack + Penetration + Hit` for Priest healing, the entered skill rate,
+Damage Bonus %, Inscription Damage %, and a fixed `×2.00` critical center hit.
 
 ## Tests
 

@@ -210,3 +210,12 @@ if (calculatorForm) {
   updateClassReference(classSelect.value);
   updateWarriorOnly(classSelect.value);
 }
+
+const ascendancyForm = document.getElementById("ascendancy-form");
+if (ascendancyForm) {
+  document.getElementById("clear-asc-stats").addEventListener("click", () => {
+    ascendancyForm.querySelectorAll('input[type="number"]').forEach((input) => {
+      input.value = "";
+    });
+  });
+}

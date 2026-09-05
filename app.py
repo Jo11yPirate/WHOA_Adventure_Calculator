@@ -79,6 +79,17 @@ FORMULA_GUIDANCE = {
     "Tank damage received": "Incoming Boss Damage × (1 − min(DMG Red %, 90%)) / [1 + (Defense Score × Defense Bonus %)]",
 }
 
+ASCENDANCY_FORMULAS = {
+    "Base damage core": "Attack + Penetration",
+    "Base healing": "Attack + Penetration + Hit",
+    "Critical rate": "Crit / (Attack + Penetration)",
+    "Healing critical rate": "Crit / Base Healing",
+    "Damage bonus multiplier": "1 + Damage Bonus %",
+    "Normal center hit": "(Attack + Pen) × Skill Rate × Damage Bonus × Inscription Layer",
+    "Critical center hit": "Normal Center Hit × 2.00",
+    "Floating output": "Observed for damage and healing; exact range pending",
+}
+
 SKILLS = {
     "Warrior": {
         "Earth Strike": (2.80, 0, "damage"),
@@ -187,6 +198,35 @@ def calculate_universal(values):
     return result
 
 
+def calculate_ascendancy(values):
+    attack = values["attack"]
+    penetration = values["penetration"]
+    hit = values["hit"]
+    crit = values["crit"]
+    damage_bonus_multiplier = 1 + values["damage_bonus_percentage"] / 100
+    inscription_layer = 1 + values["inscription_damage_percentage"] / 100
+    base_damage = attack + penetration
+    base_healing = base_damage + hit
+    is_healing = values["class_name"] == "Priest"
+    core_output = base_healing if is_healing else base_damage
+    skill_rate = values["skill_damage_rate_percentage"] / 100
+    normal_center_hit = core_output * skill_rate * damage_bonus_multiplier * inscription_layer
+    critical_center_hit = normal_center_hit * 2
+    critical_rate = (crit / core_output * 100) if core_output else 0
+    return {
+        **values,
+        "is_healing": is_healing,
+        "base_damage": base_damage,
+        "base_healing": base_healing,
+        "core_output": core_output,
+        "damage_bonus_multiplier": damage_bonus_multiplier,
+        "inscription_layer": inscription_layer,
+        "normal_center_hit": normal_center_hit,
+        "critical_center_hit": critical_center_hit,
+        "critical_rate": critical_rate,
+    }
+
+
 def read_stats(form):
     class_name = form.get("class_name", "Priest")
     if class_name not in CLASS_GUIDANCE:
@@ -252,25 +292,48 @@ def read_universal(form):
     return calculate_universal(values)
 
 
+def read_ascendancy(form):
+    class_name = form.get("class_name", "Assassin")
+    if class_name not in CLASS_GUIDANCE:
+        raise ValueError("Choose a valid class.")
+    fields = ("attack", "penetration", "hit", "crit", "damage_bonus_percentage",
+              "skill_damage_rate_percentage", "inscription_damage_percentage")
+    values = {"class_name": class_name}
+    for field in fields:
+        value = form.get(field, type=float)
+        if value is None or value < 0:
+            raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
+        values[field] = value
+    return calculate_ascendancy(values)
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     stats = None
+    asc_stats = None
     error = None
     selected_class = request.values.get("class_name", "Assassin")
     calculator = request.values.get("calculator", "universal")
     if request.method == "POST":
         try:
-            stats = read_universal(request.form) if calculator == "universal" else read_stats(request.form)
+            if calculator == "universal":
+                stats = read_universal(request.form)
+            elif calculator == "ascendancy":
+                asc_stats = read_ascendancy(request.form)
+            else:
+                stats = read_stats(request.form)
         except ValueError as exc:
             error = str(exc)
     return render_template(
         "index.html",
         stats=stats,
+        asc_stats=asc_stats,
         error=error,
         guidance=BUILD_GUIDANCE,
         class_guidance=CLASS_GUIDANCE,
         selected_class=selected_class,
         formula_guidance=FORMULA_GUIDANCE,
+        ascendancy_formulas=ASCENDANCY_FORMULAS,
         class_profiles=CLASS_PROFILES,
         skills=SKILLS,
         calculator=calculator,
