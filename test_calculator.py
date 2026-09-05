@@ -134,6 +134,8 @@ class AscendancyCalculatorTests(unittest.TestCase):
 
         self.assertTrue(result["is_healing"])
         self.assertEqual(result["base_healing"], 1500.0)
+        self.assertEqual(result["heal_power"], 1500.0)
+        self.assertEqual(result["heal_crit"], 10.0)
         self.assertEqual(result["normal_center_hit"], 1500.0)
         self.assertEqual(result["critical_rate"], 10.0)
 

@@ -117,6 +117,7 @@ function updateWarriorOnly(className) {
     } else {
       element.hidden = className !== "Warrior";
     }
+
   });
   if (className !== "Warrior") {
     const outputTab = document.querySelector('[data-screen-tab="output"]');
@@ -138,6 +139,18 @@ function updateWarriorOnly(className) {
       tab.setAttribute("aria-selected", "false");
     });
   }
+}
+
+function updatePriestOnly(className) {
+  document.querySelectorAll(".priest-only").forEach((element) => {
+    element.hidden = className !== "Priest";
+  });
+  const label = document.getElementById("critical-rate-label");
+  const formula = document.getElementById("critical-rate-formula");
+  if (label) label.textContent = className === "Priest" ? "Heal Crit" : "Critical Rate";
+  if (formula) formula.textContent = className === "Priest"
+    ? "Crit ÷ (Attack + Penetration + Hit)"
+    : "Crit ÷ core output";
 }
 
 function runRecalculationPipeline() {
@@ -190,6 +203,7 @@ function runRecalculationPipeline() {
     document.getElementById("res-normal").textContent = format(rawOutput * mitigation);
     document.getElementById("res-crit").textContent = format(rawOutput * mitigation * criticalMultiplier);
     document.getElementById("res-critical-rate").textContent = `${criticalRate.toFixed(2)}%`;
+    setText("res-heal-power", coreOutput.toFixed(2));
     document.getElementById("res-estimated-accuracy").textContent = `${estimatedAccuracy.toFixed(2)}%`;
     const tankResult = document.getElementById("res-tank");
     if (tankResult) tankResult.textContent = format(damageReceived);
@@ -274,6 +288,7 @@ if (calculatorForm) {
   });
   classSelect.addEventListener("change", () => updateClassReference(classSelect.value));
   classSelect.addEventListener("change", () => updateWarriorOnly(classSelect.value));
+  classSelect.addEventListener("change", () => updatePriestOnly(classSelect.value));
   calculatorForm.querySelectorAll("input, select").forEach((input) => {
     input.addEventListener("input", () => {
       saveCalculatorState(calculatorForm, classSelect);
@@ -283,4 +298,5 @@ if (calculatorForm) {
   runRecalculationPipeline();
   updateClassReference(classSelect.value);
   updateWarriorOnly(classSelect.value);
+  updatePriestOnly(classSelect.value);
 }

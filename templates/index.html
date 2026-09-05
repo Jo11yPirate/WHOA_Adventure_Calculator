@@ -140,7 +140,8 @@
               <article class="metric"><span>Raw Output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
               <article class="metric"><span>Normal Output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Enemy defense not entered</small></article>
               <article class="metric"><span>Critical Output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
-              <article class="metric"><span>Critical Rate</span><strong id="res-critical-rate">{{ "%.2f"|format(stats.critical_rate) }}%</strong><small>Crit ÷ core output</small></article>
+              <article class="metric"><span>{% if selected_class == "Priest" %}Heal Crit{% else %}Critical Rate{% endif %}</span><strong id="res-critical-rate">{{ "%.2f"|format(stats.critical_rate) }}%</strong><small>{% if selected_class == "Priest" %}Crit ÷ (Attack + Penetration + Hit){% else %}Crit ÷ core output{% endif %}</small></article>
+              {% if selected_class == "Priest" %}<article class="metric"><span>Heal Power (HPI)</span><strong id="res-heal-power">{{ "{:,.2f}".format(stats.heal_power) }}</strong><small>Attack + Hit + Penetration</small></article>{% endif %}
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">{{ "%.2f"|format(stats.estimated_accuracy) }}%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
             </div>
             <div class="recommendation warrior-only">
@@ -206,7 +207,8 @@
               <article class="metric"><span>Raw Output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
               <article class="metric"><span>Normal Output</span><strong id="res-normal">0</strong><small id="log-mitigation">Enemy defense not entered</small></article>
               <article class="metric"><span>Critical Output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
-              <article class="metric"><span>Critical Rate</span><strong id="res-critical-rate">0.00%</strong><small>Crit ÷ core output</small></article>
+              <article class="metric"><span id="critical-rate-label">Critical Rate</span><strong id="res-critical-rate">0.00%</strong><small id="critical-rate-formula">Crit ÷ core output</small></article>
+              <article class="metric priest-only" hidden><span>Heal Power (HPI)</span><strong id="res-heal-power">0.00</strong><small>Attack + Hit + Penetration</small></article>
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">0.00%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
             </div>
             <div class="recommendation warrior-only">

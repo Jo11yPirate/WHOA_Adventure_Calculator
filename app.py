@@ -217,6 +217,8 @@ def calculate_ascendancy(values):
         "is_healing": is_healing,
         "base_damage": base_damage,
         "base_healing": base_healing,
+        "heal_power": base_healing,
+        "heal_crit": critical_rate,
         "core_output": core_output,
         "damage_bonus_multiplier": damage_bonus_multiplier,
         "normal_center_hit": normal_center_hit,
