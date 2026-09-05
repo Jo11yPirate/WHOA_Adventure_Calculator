@@ -44,7 +44,7 @@
               ] %}
                 <div>
                   <label for="{{ field }}" title="{{ tip }}">{{ label }}</label>
-                  <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}" required>
+                  <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}">
                 </div>
               {% endfor %}
             </div>
@@ -66,14 +66,14 @@
               ] %}
                 <div>
                   <label for="{{ field }}" title="{{ tip }}">{{ label }}</label>
-                  <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}" required>
+                  <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}">
                 </div>
               {% endfor %}
             </div>
           </div>
           <input type="hidden" name="calculator" value="universal">
           <div class="form-actions">
-            <button type="submit">Calculate Authoritative Stats <span aria-hidden="true">→</span></button>
+            <button type="submit">Calculate Stats <span aria-hidden="true">→</span></button>
             <button id="clear-stats" type="button" class="secondary-button">Clear All Stats</button>
           </div>
         </form>
@@ -113,11 +113,15 @@
             </div>
             <div class="metric-grid">
               <article class="metric"><span>Raw Output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
-              <article class="metric"><span>Normal Output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Enemy Defense Unknown</small></article>
+              <article class="metric"><span>Normal Output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Assumes 5,000 enemy Defense</small></article>
               <article class="metric"><span>Critical Output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
               <article class="metric"><span>{% if selected_class == "Priest" %}Heal Crit{% else %}Critical Rate{% endif %}</span><strong id="res-critical-rate">{{ "%.2f"|format(stats.critical_rate) }}%</strong><small>{% if selected_class == "Priest" %}Crit ÷ (Attack + Penetration + Hit){% else %}Crit ÷ core output{% endif %}</small></article>
               {% if selected_class == "Priest" %}<article class="metric"><span>Heal Power (HPI)</span><strong id="res-heal-power">{{ "{:,.2f}".format(stats.heal_power) }}</strong><small>Attack + Hit + Penetration</small></article>{% endif %}
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">{{ "%.2f"|format(stats.estimated_accuracy) }}%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
+              <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>Effective HP</span><strong id="res-effective-hp">{{ "{:,.0f}".format(stats.warrior_effective_hp) }}</strong><small>Assumes 5,000 incoming damage</small></article>
+              <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>HP Contribution</span><strong id="res-hp-contribution">{{ "%.2f"|format(stats.warrior_hp_contribution) }}%</strong><small>Raw HP portion of effective HP</small></article>
+              <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>Resilience</span><strong id="res-resilience">{{ "%.2f"|format(stats.warrior_resilience) }}</strong><small>Estimated hits survived</small></article>
+              <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>Dodge Percentage</span><strong id="res-dodge">{{ "%.2f"|format(stats.warrior_dodge) }}%</strong><small>Assumes 5,000 enemy Hit</small></article>
             </div>
           {% else %}
             <div class="section-heading">
@@ -150,11 +154,15 @@
             </div>
             <div class="metric-grid">
               <article class="metric"><span>Raw Output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
-              <article class="metric"><span>Normal Output</span><strong id="res-normal">0</strong><small id="log-mitigation">Enemy Defense Unknown</small></article>
+              <article class="metric"><span>Normal Output</span><strong id="res-normal">0</strong><small id="log-mitigation">Assumes 5,000 enemy Defense</small></article>
               <article class="metric"><span>Critical Output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
               <article class="metric"><span id="critical-rate-label">Critical Rate</span><strong id="res-critical-rate">0.00%</strong><small id="critical-rate-formula">Crit ÷ core output</small></article>
               <article class="metric priest-only" hidden><span>Heal Power (HPI)</span><strong id="res-heal-power">0.00</strong><small>Attack + Hit + Penetration</small></article>
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">0.00%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
+              <article class="metric warrior-only" hidden><span>Effective HP</span><strong id="res-effective-hp">0</strong><small>Assumes 5,000 incoming damage</small></article>
+              <article class="metric warrior-only" hidden><span>HP Contribution</span><strong id="res-hp-contribution">0.00%</strong><small>Raw HP portion of effective HP</small></article>
+              <article class="metric warrior-only" hidden><span>Resilience</span><strong id="res-resilience">0.00</strong><small>Estimated hits survived</small></article>
+              <article class="metric warrior-only" hidden><span>Dodge Percentage</span><strong id="res-dodge">0.00%</strong><small>Assumes 5,000 enemy Hit</small></article>
             </div>
           {% endif %}
         </section>
@@ -187,7 +195,6 @@
 
       <section id="compare" class="app-page card guide" data-app-page="compare">
         <div class="section-heading"><div><p class="eyebrow">Equipment Comparison</p><h2>Compare Current And New Stats</h2></div></div>
-        <p class="muted">Enter the stats gained by the equipment piece to see the resulting totals and changes.</p>
         <div class="comparison-grid">
           <div>
             <h3>Current Stats</h3>
@@ -210,11 +217,16 @@
           <h3>Comparison Result</h3>
           <div id="comparison-output" class="metric-grid"><p class="muted">Enter current stats and equipment stats to compare them.</p></div>
         </div>
+        <div class="form-actions">
+          <button id="compare-calculate" type="button">Calculate Stats <span aria-hidden="true">→</span></button>
+          <button id="compare-clear-all" type="button" class="secondary-button">Clear All Stats</button>
+          <button id="compare-clear-equipment" type="button" class="secondary-button">Clear Equip Stats</button>
+        </div>
       </section>
 
       <section id="reference" class="app-page card guide" data-app-page="reference">
         <div class="reference-section">
-          <div class="section-heading"><div><p class="eyebrow">Class Reference</p><h2>Build Priorities</h2></div></div>
+          <div class="section-heading"><div><p class="eyebrow">Class Reference</p></div></div>
           <div class="guide-grid">
             {% for class_name, profile in class_profiles.items() %}
               <div class="class-reference" data-reference-class="{{ class_name }}" {% if class_name != selected_class %}hidden{% endif %}>
@@ -231,7 +243,7 @@
           <div class="section-heading"><div><p class="eyebrow">Formula Guide</p></div></div>
           <div class="formula-list">
             {% for name, formula in formula_guidance.items() %}
-              <div><strong>{{ name }}</strong><code>{{ formula }}</code></div>
+              <div><strong>{{ name }}{% if name in ["Hit Percentage", "Warrior Effective HP", "Warrior HP Contribution", "Warrior Resilience", "Warrior Dodge"] %}<small>(AI-Generated Approximation)</small>{% endif %}</strong><code>{{ formula }}</code></div>
             {% endfor %}
           </div>
         </div>
@@ -243,7 +255,7 @@
             {% endfor %}
           </div>
         </div>
-        <p class="reference-credit">Combat models provided by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.</p>
+        <p class="reference-credit">Combat models provided by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.<br>Special thanks to Spade &amp; JMS for crucial advice!</p>
       </section>
     </main>
     <nav class="quick-nav" aria-label="Quick navigation">

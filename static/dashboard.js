@@ -29,10 +29,16 @@ function readNumber(id) {
 function readOptionalNumber(id) {
   const input = document.getElementById(id);
   const value = Number(input.value);
-  if (input.value === "") return 0;
+  if (input.value === "") {
+    input.classList.remove("input-error");
+    return 0;
+  }
   if (!Number.isFinite(value) || value < 0) {
+    input.classList.add("input-error");
+    input.title = `${input.labels[0].textContent}: enter 0 or greater.`;
     throw new Error(`${input.labels[0].textContent} must be 0 or greater.`);
   }
+  input.classList.remove("input-error");
   return value;
 }
 
@@ -42,6 +48,10 @@ function setText(id, value) {
 }
 
 const calculatorStorageKey = "whoa-adventure-calculator-stats";
+const comparisonStorageKey = "whoa-adventure-comparison-stats";
+const enemyDefenseBaseline = 5000;
+const enemyHitBaseline = 5000;
+const incomingHitBaseline = 5000;
 
 function saveCalculatorState(form, classSelect) {
   const state = {
@@ -62,6 +72,32 @@ function restoreCalculatorState(form, classSelect) {
     const input = document.getElementById(id);
     if (input) input.value = value;
   });
+}
+
+function saveComparisonState() {
+  const fields = {};
+  document.querySelectorAll(".compare-current, .compare-item").forEach((input) => {
+    fields[`${input.classList.contains("compare-item") ? "item" : "current"}-${input.dataset.stat}`] = input.value;
+  });
+  localStorage.setItem(comparisonStorageKey, JSON.stringify(fields));
+}
+
+function restoreComparisonState() {
+  const saved = localStorage.getItem(comparisonStorageKey);
+  if (!saved) return;
+  const fields = JSON.parse(saved);
+  document.querySelectorAll(".compare-current, .compare-item").forEach((input) => {
+    const key = `${input.classList.contains("compare-item") ? "item" : "current"}-${input.dataset.stat}`;
+    if (Object.prototype.hasOwnProperty.call(fields, key)) input.value = fields[key];
+  });
+}
+
+function clearComparisonFields(selector) {
+  document.querySelectorAll(selector).forEach((input) => {
+    input.value = "";
+  });
+  saveComparisonState();
+  updateComparison();
 }
 
 function format(value) {
@@ -122,6 +158,9 @@ function updatePriestOnly(className) {
   if (formula) formula.textContent = className === "Priest"
     ? "Crit ÷ (Attack + Penetration + Hit)"
     : "Crit ÷ core output";
+  document.querySelectorAll(".warrior-only").forEach((element) => {
+    element.hidden = className !== "Warrior";
+  });
 }
 
 function updateComparison() {
@@ -155,20 +194,27 @@ function updateComparison() {
 function runRecalculationPipeline() {
   const error = document.getElementById("live-error");
   try {
-  const baseAttribute = readNumber("base_attribute");
-    const outputBonus = readNumber("bonus_percentage") / 100;
-    const penetrationRating = readNumber("stat_penetration");
-    const hitRating = readNumber("stat_hit");
-    const critRating = readNumber("stat_crit");
+  const baseAttribute = readOptionalNumber("base_attribute");
+  const outputBonus = readOptionalNumber("bonus_percentage") / 100;
+  const penetrationRating = readOptionalNumber("stat_penetration");
+  const hitRating = readOptionalNumber("stat_hit");
+  const critRating = readOptionalNumber("stat_crit");
     const isHealing = document.getElementById("class-select").value === "Priest";
     const coreOutput = baseAttribute + penetrationRating + (isHealing ? hitRating : 0);
     const rawOutput = coreOutput * (1 + outputBonus);
-    const effectiveDefense = 0;
-    const mitigation = 1;
+    const effectiveDefense = Math.max(0, enemyDefenseBaseline - penetrationRating);
+    const mitigation = 1 / (1 + effectiveDefense / 2000);
     const criticalMultiplier = 2;
     const criticalRate = coreOutput ? (critRating / coreOutput) * 100 : 0;
     const estimatedAccuracy = Math.min(100, hitRating);
     const critEvaluation = effectiveStat("Critical_Rate_Percentage", critRating);
+    const hp = readOptionalNumber("stat_hp");
+    const defense = readOptionalNumber("defense_score");
+    const evasion = readOptionalNumber("stat_evasion");
+    const damageReduction = Math.min(90, readOptionalNumber("damage_reduction_percentage")) / 100;
+    const defenseMultiplier = 1 / (1 + defense / 2000);
+    const incomingDamageMultiplier = defenseMultiplier * (1 - damageReduction);
+    const effectiveHp = incomingDamageMultiplier ? hp / incomingDamageMultiplier : hp;
 
     setText("res-raw", format(rawOutput));
     setText("res-normal", format(rawOutput * mitigation));
@@ -176,9 +222,15 @@ function runRecalculationPipeline() {
     setText("res-critical-rate", `${criticalRate.toFixed(2)}%`);
     setText("res-heal-power", coreOutput.toFixed(2));
     setText("res-estimated-accuracy", `${estimatedAccuracy.toFixed(2)}%`);
-    setText("log-mitigation", "Enemy Defense Unknown");
+    setText("res-effective-hp", format(effectiveHp));
+    setText("res-hp-contribution", `${(incomingDamageMultiplier * 100).toFixed(2)}%`);
+    setText("res-resilience", (effectiveHp / incomingHitBaseline).toFixed(2));
+    setText("res-dodge", `${Math.min(100, evasion / enemyHitBaseline * 100).toFixed(2)}%`);
+    setText("screen-normal", format(rawOutput * mitigation));
+    setText("screen-critical", format(rawOutput * mitigation * criticalMultiplier));
+    setText("log-mitigation", `Assumes ${enemyDefenseBaseline.toLocaleString()} enemy Defense`);
     setText("log-crit-mult", `×${criticalMultiplier.toFixed(2)} after resistance`);
-    updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, readNumber("stat_defense_rating"), penetrationRating, outputBonus, 0, mitigation, 0, 0, 0);
+    updateCharts(rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, baseAttribute, readOptionalNumber("stat_defense_rating"), penetrationRating, outputBonus, enemyDefenseBaseline, mitigation, 0, 0, 0);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;
   } catch (validationError) {
@@ -228,9 +280,26 @@ showAppPage(["calculator-page", "compare", "visualization", "reference"].include
   ? (initialPage === "calculator-page" ? "calculator" : initialPage)
   : "calculator");
 document.querySelectorAll(".compare-current, .compare-item").forEach((input) => {
-  input.addEventListener("input", updateComparison);
+  input.addEventListener("input", () => {
+    saveComparisonState();
+    updateComparison();
+  });
 });
+restoreComparisonState();
 updateComparison();
+
+document.getElementById("compare-calculate")?.addEventListener("click", updateComparison);
+document.getElementById("compare-clear-equipment")?.addEventListener("click", () => {
+  clearComparisonFields(".compare-item");
+});
+document.getElementById("compare-clear-all")?.addEventListener("click", () => {
+  if (!window.confirm("Clear all entered stats? This cannot be undone.")) return;
+  clearComparisonFields(".compare-current, .compare-item");
+  document.querySelectorAll('#calculator input[type="number"]').forEach((input) => {
+    input.value = "";
+  });
+  localStorage.removeItem(calculatorStorageKey);
+});
 
 const calculatorForm = document.querySelector(".stats-form");
 if (calculatorForm) {
@@ -243,6 +312,7 @@ if (calculatorForm) {
       input.value = "";
     });
     localStorage.removeItem(calculatorStorageKey);
+    clearComparisonFields(".compare-current, .compare-item");
     document.getElementById("live-error").hidden = true;
   });
   classSelect.addEventListener("change", () => {

@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
+ENEMY_DEFENSE_BASELINE = 5000.0
+ENEMY_HIT_BASELINE = 5000.0
+INCOMING_HIT_BASELINE = 5000.0
 
 DIMINISHING_RETURNS_CONFIG = {
     "affected_stats": {
@@ -71,22 +74,26 @@ CLASS_PROFILES = {
 }
 
 FORMULA_GUIDANCE = {
-    "Base damage": "ATK + Penetration",
-    "Critical rate": "Crit / (ATK + Penetration)",
-    "Healing output": "ATK + Penetration + Hit",
-    "Critical damage/healing": "Normal Center Hit × 2.00",
-    "Damage bonus": "1 + Damage Bonus %",
-    "Hit percentage (AI-generated approximation)": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
+    "Base Damage": "ATK + Penetration",
+    "Critical Rate": "Crit / (ATK + Penetration)",
+    "Healing Output": "ATK + Penetration + Hit",
+    "Critical Damage/Healing": "Normal Center Hit × 2.00",
+    "Damage Bonus": "1 + Damage Bonus %",
+    "Hit Percentage": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
+    "Warrior Effective HP": "HP ÷ ((1 ÷ (1 + Defense ÷ 2,000)) × (1 - Damage Reduction))",
+    "Warrior HP Contribution": "HP ÷ Effective HP × 100",
+    "Warrior Resilience": "Effective HP ÷ assumed incoming hit",
+    "Warrior Dodge": "min(100, Evasion ÷ assumed enemy Hit × 100)",
 }
 
 ASCENDANCY_FORMULAS = {
-    "Base damage core": "Attack + Penetration",
-    "Base healing": "Attack + Penetration + Hit",
-    "Critical rate": "Crit / (Attack + Penetration)",
-    "Healing critical rate": "Crit / Base Healing",
-    "Damage bonus multiplier": "1 + Damage Bonus %",
-    "Normal center hit": "(Attack + Pen) × Damage Bonus",
-    "Critical center hit": "Normal Center Hit × 2.00",
+    "Base Damage Core": "Attack + Penetration",
+    "Base Healing": "Attack + Penetration + Hit",
+    "Critical Rate": "Crit / (Attack + Penetration)",
+    "Healing Critical Rate": "Crit / Base Healing",
+    "Damage Bonus Multiplier": "1 + Damage Bonus %",
+    "Normal Center Hit": "(Attack + Pen) × Damage Bonus",
+    "Critical Center Hit": "Normal Center Hit × 2.00",
 }
 
 SKILLS = {
@@ -209,6 +216,13 @@ def calculate_ascendancy(values):
     core_output = base_healing if is_healing else base_damage
     normal_center_hit = core_output * damage_bonus_multiplier
     critical_center_hit = normal_center_hit * 2
+    effective_enemy_defense = max(0, ENEMY_DEFENSE_BASELINE - penetration)
+    mitigation_multiplier = 1 / (1 + effective_enemy_defense / 2000)
+    defense_score = values.get("defense_score", 0)
+    damage_reduction = min(90, values.get("damage_reduction_percentage", 0)) / 100
+    defense_multiplier = 1 / (1 + defense_score / 2000)
+    incoming_damage_multiplier = defense_multiplier * (1 - damage_reduction)
+    hp = values.get("stat_hp", 0)
     critical_rate = (crit / core_output * 100) if core_output else 0
     estimated_accuracy = min(100, hit)
     result = {
@@ -225,8 +239,13 @@ def calculate_ascendancy(values):
         "critical_rate": critical_rate,
         "estimated_accuracy": estimated_accuracy,
         "raw_output": normal_center_hit,
-        "mitigated_output": normal_center_hit,
-        "critical_output": critical_center_hit,
+        "mitigated_output": normal_center_hit * mitigation_multiplier,
+        "critical_output": critical_center_hit * mitigation_multiplier,
+        "mitigation_multiplier": mitigation_multiplier,
+        "warrior_effective_hp": hp / incoming_damage_multiplier if incoming_damage_multiplier else hp,
+        "warrior_resilience": (hp / incoming_damage_multiplier) / INCOMING_HIT_BASELINE if incoming_damage_multiplier else 0,
+        "warrior_hp_contribution": incoming_damage_multiplier * 100,
+        "warrior_dodge": min(100, values.get("stat_evasion", 0) / ENEMY_HIT_BASELINE * 100),
         "critical_multiplier": 2.0,
         "damage_received": 0.0,
         "damage_reduction_applied": 0.0,
@@ -282,7 +301,7 @@ def read_universal(form):
         "bonus_percentage",
         "damage_reduction_percentage",
     ):
-        value = form.get(field, type=float)
+        value = form.get(field, default=0, type=float)
         if value is None or value < 0:
             raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
         values[field] = value
