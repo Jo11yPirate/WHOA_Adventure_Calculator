@@ -76,7 +76,7 @@ FORMULA_GUIDANCE = {
     "Healing output": "ATK + Penetration + Hit",
     "Critical damage/healing": "Normal Center Hit × 2.00",
     "Damage bonus": "1 + Damage Bonus %",
-    "Estimated accuracy (AI-generated approximation)": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
+    "Hit percentage (AI-generated approximation)": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
     "Floating output": "Observed in-game; exact range pending",
     "Tank damage received": "Incoming Boss Damage × (1 − min(DMG Red %, 90%)) / [1 + (Defense Score × Defense Bonus %)]",
 }
