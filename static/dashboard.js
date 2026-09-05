@@ -26,6 +26,16 @@ function readNumber(id) {
   return value;
 }
 
+function readOptionalNumber(id) {
+  const input = document.getElementById(id);
+  const value = Number(input.value);
+  if (input.value === "") return 0;
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`${input.labels[0].textContent} must be 0 or greater.`);
+  }
+  return value;
+}
+
 function format(value) {
   return Math.round(value).toLocaleString();
 }
@@ -109,11 +119,11 @@ function runRecalculationPipeline() {
     const attackBonus = readNumber("attack_bonus_percentage") / 100;
     const outputBonus = readNumber("bonus_percentage") / 100;
     const enemyDefense = 0;
-    const penetration = readNumber("penetration_percentage") / 100;
-    const flatPenetration = readNumber("flat_penetration");
-    const critBonus = readNumber("crit_damage_bonus_percentage") / 100;
-    const critResistance = readNumber("target_crit_resistance_percentage") / 100;
-    const incomingDamage = readNumber("incoming_damage");
+    const penetration = 0;
+    const flatPenetration = readNumber("stat_penetration");
+    const critBonus = 0;
+    const critResistance = 0;
+    const incomingDamage = readOptionalNumber("incoming_damage");
     const damageReduction = Math.min(readNumber("damage_reduction_percentage"), 90) / 100;
     const defenseScore = readNumber("defense_score");
     const defenseBonus = readNumber("defense_bonus_percentage") / 100;
@@ -123,7 +133,7 @@ function runRecalculationPipeline() {
     const criticalMultiplier = Math.max(1, 1.5 + critBonus - critResistance);
     const damageReceived = (incomingDamage * (1 - damageReduction)) /
       (1 + defenseScore * defenseBonus);
-    const critEvaluation = effectiveStat("Critical_Rate_Percentage", readNumber("crit_damage_bonus_percentage"));
+    const critEvaluation = effectiveStat("Critical_Rate_Percentage", readNumber("stat_crit"));
 
     document.getElementById("res-raw").textContent = format(rawOutput);
     document.getElementById("res-normal").textContent = format(rawOutput * mitigation);

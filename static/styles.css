@@ -320,6 +320,19 @@ input:focus, select:focus {
   gap: 5px 8px;
 }
 
+.stats-section {
+  margin-top: 12px;
+}
+
+.stats-section h2 {
+  border-bottom: 1px solid var(--line);
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: .08em;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+}
+
 .stats-form h2 {
   margin-bottom: 3px;
 }

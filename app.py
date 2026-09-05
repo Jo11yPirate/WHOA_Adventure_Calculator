@@ -200,6 +200,8 @@ def read_stats(form):
 
     for field in ("attack", "hit", "penetration", "crit"):
         value = form.get(field, type=float)
+        if field == "incoming_damage" and value is None:
+            value = 0.0
         if value is None or value < 0:
             raise ValueError(f"{field.title()} must be 0 or greater.")
         values[field] = value
@@ -215,21 +217,37 @@ def read_universal(form):
     values = {"class_name": class_name}
     for field in (
         "base_attribute",
+        "stat_attack_rating",
+        "stat_defense_rating",
+        "stat_hp",
+        "stat_crit",
+        "stat_crit_resistance",
+        "stat_hit",
+        "stat_evasion",
+        "stat_penetration",
         "attack_bonus_percentage",
+        "hp_bonus_percentage",
+        "crit_bonus_percentage",
+        "crit_res_bonus_percentage",
+        "hit_bonus_percentage",
+        "evasion_bonus_percentage",
+        "penetration_bonus_percentage",
         "bonus_percentage",
-        "penetration_percentage",
-        "flat_penetration",
-        "crit_damage_bonus_percentage",
-        "target_crit_resistance_percentage",
         "incoming_damage",
         "damage_reduction_percentage",
         "defense_score",
         "defense_bonus_percentage",
     ):
         value = form.get(field, type=float)
+        if field == "incoming_damage" and value is None:
+            value = 0.0
         if value is None or value < 0:
             raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
         values[field] = value
+    values["penetration_percentage"] = 0.0
+    values["flat_penetration"] = values["stat_penetration"]
+    values["crit_damage_bonus_percentage"] = 0.0
+    values["target_crit_resistance_percentage"] = 0.0
     values["enemy_defense"] = 0.0
     return calculate_universal(values)
 
