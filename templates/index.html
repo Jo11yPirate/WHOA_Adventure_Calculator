@@ -29,24 +29,23 @@
 
           <div class="form-row">
             {% for field, label, tip in [
-              ("base_attribute", "Base attribute", "Your raw Attack or Magic ATK value."),
+              ("base_attribute", "Attack / Magic ATK", "Your raw Attack or Magic ATK value."),
               ("attack_bonus_percentage", "Attack bonus %", "Percent that strengthens flat Attack gains."),
               ("bonus_percentage", "Damage / healing bonus %", "Direct damage or healing multiplier bonus."),
-              ("enemy_defense", "Enemy defense", "Target defense before penetration."),
               ("penetration_percentage", "Penetration %", "Percent of enemy defense ignored."),
               ("flat_penetration", "Flat penetration", "Flat defense ignored after percent penetration."),
-              ("crit_damage_bonus_percentage", "Crit damage bonus %", "Extra critical multiplier bonus."),
+              ("crit_damage_bonus_percentage", "Crit damage bonus %", "Not the same as Crit Bonus %: this adds to the critical multiplier."),
               ("target_crit_resistance_percentage", "Target Crit Resistance %", "Target reduction to critical damage."),
               ("incoming_damage", "Incoming boss damage", "Damage received before your defenses."),
               ("damage_reduction_percentage", "DMG reduction %", "Percent of incoming damage reduced; capped at 90%."),
               ("defense_score", "Defense score", "Your total defensive score."),
               ("defense_bonus_percentage", "Defense bonus %", "Percent bonus applied to defense."),
-              ("stat_penetration", "Build penetration rating", "Your displayed flat Penetration stat."),
-              ("stat_crit", "Build crit rating", "Your displayed Crit stat."),
-              ("stat_hit", "Build hit rating", "Your displayed Hit or Accuracy stat."),
-              ("stat_hp", "Build HP", "Your displayed maximum HP."),
-              ("stat_evasion", "Build evasion", "Your displayed Evasion stat."),
-              ("stat_crit_resistance", "Build Crit RES", "Your displayed critical resistance stat.")
+              ("stat_penetration", "Penetration rating", "Your displayed flat Penetration stat."),
+              ("stat_crit", "Crit rating", "Your displayed Crit stat."),
+              ("stat_hit", "Hit rating", "Your displayed Hit or Accuracy stat."),
+              ("stat_hp", "HP", "Your displayed maximum HP."),
+              ("stat_evasion", "Evasion", "Your displayed Evasion stat."),
+              ("stat_crit_resistance", "Crit RES", "Your displayed critical resistance stat.")
             ] %}
               <div class="{{ 'warrior-only' if field in ('incoming_damage', 'damage_reduction_percentage', 'defense_score', 'defense_bonus_percentage') else '' }}">
                 <label for="{{ field }}" title="{{ tip }}">{{ label }}</label>
@@ -75,7 +74,6 @@
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
                 <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
-                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="defense">Defense</button>
                 <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
@@ -95,11 +93,6 @@
                 <div class="screen-equation">PEN&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
                 <div class="screen-equation">BONUS&nbsp; <strong id="screen-bonus">0%</strong></div>
               </div>
-              <div class="screen-panel" data-screen-panel="defense" role="tabpanel" hidden>
-                <div class="screen-equation">ENEMY DEF <strong id="screen-enemy-defense">0</strong></div>
-                <div class="screen-equation">EFFECTIVE <strong id="screen-effective-defense">0</strong></div>
-                <div class="screen-equation">MITIGATION <strong id="screen-mitigation">×1.000</strong></div>
-              </div>
               <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
                 <div class="screen-equation">INCOMING <strong id="screen-incoming">0</strong></div>
                 <div class="screen-equation">DMG RED&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
@@ -107,10 +100,9 @@
               </div>
             </div>
             <div class="metric-grid">
-              <article class="metric"><span>Raw output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Before defense</small></article>
-              <article class="metric"><span>After mitigation</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">×{{ "%.3f"|format(stats.mitigation_multiplier) }}</small></article>
+              <article class="metric"><span>Raw output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
+              <article class="metric"><span>Normal output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Enemy defense not entered</small></article>
               <article class="metric"><span>Critical output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
-              <article class="metric"><span>Effective defense</span><strong id="res-defense">{{ "{:,.0f}".format(stats.effective_defense) }}</strong><small id="log-eff-def">After penetration</small></article>
             </div>
             <div class="recommendation warrior-only">
               <p class="eyebrow">Tank result</p>
@@ -130,7 +122,6 @@
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
                 <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
-                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="defense">Defense</button>
                 <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
@@ -150,11 +141,6 @@
                 <div class="screen-equation">PEN&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
                 <div class="screen-equation">BONUS&nbsp; <strong id="screen-bonus">0%</strong></div>
               </div>
-              <div class="screen-panel" data-screen-panel="defense" role="tabpanel" hidden>
-                <div class="screen-equation">ENEMY DEF <strong id="screen-enemy-defense">0</strong></div>
-                <div class="screen-equation">EFFECTIVE <strong id="screen-effective-defense">0</strong></div>
-                <div class="screen-equation">MITIGATION <strong id="screen-mitigation">×1.000</strong></div>
-              </div>
               <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
                 <div class="screen-equation">INCOMING <strong id="screen-incoming">0</strong></div>
                 <div class="screen-equation">DMG RED&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
@@ -162,10 +148,9 @@
               </div>
             </div>
             <div class="metric-grid">
-              <article class="metric"><span>Raw output</span><strong id="res-raw">0</strong><small>Before defense</small></article>
-              <article class="metric"><span>After mitigation</span><strong id="res-normal">0</strong><small id="log-mitigation">×1.000</small></article>
+              <article class="metric"><span>Raw output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
+              <article class="metric"><span>Normal output</span><strong id="res-normal">0</strong><small id="log-mitigation">Enemy defense not entered</small></article>
               <article class="metric"><span>Critical output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
-              <article class="metric"><span>Effective defense</span><strong id="res-defense">0</strong><small id="log-eff-def">After penetration</small></article>
             </div>
             <div class="recommendation warrior-only">
               <p class="eyebrow">Tank result</p>

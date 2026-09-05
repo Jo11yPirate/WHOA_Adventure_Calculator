@@ -61,9 +61,6 @@ function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, 
   document.getElementById("screen-attack").textContent = format(attack);
   document.getElementById("screen-penetration").textContent = format(penetration);
   document.getElementById("screen-bonus").textContent = `${(outputBonus * 100).toFixed(1)}%`;
-  document.getElementById("screen-enemy-defense").textContent = format(enemyDefense);
-  document.getElementById("screen-effective-defense").textContent = format(defense);
-  document.getElementById("screen-mitigation").textContent = `×${mitigation.toFixed(3)}`;
   document.getElementById("screen-incoming").textContent = format(incomingDamage);
   document.getElementById("screen-damage-reduction").textContent = `${(damageReduction * 100).toFixed(1)}%`;
   document.getElementById("screen-taken").textContent = format(damageReceived);
@@ -111,7 +108,7 @@ function runRecalculationPipeline() {
   const baseAttribute = readNumber("base_attribute");
     const attackBonus = readNumber("attack_bonus_percentage") / 100;
     const outputBonus = readNumber("bonus_percentage") / 100;
-    const enemyDefense = readNumber("enemy_defense");
+    const enemyDefense = 0;
     const penetration = readNumber("penetration_percentage") / 100;
     const flatPenetration = readNumber("flat_penetration");
     const critBonus = readNumber("crit_damage_bonus_percentage") / 100;
@@ -131,12 +128,11 @@ function runRecalculationPipeline() {
     document.getElementById("res-raw").textContent = format(rawOutput);
     document.getElementById("res-normal").textContent = format(rawOutput * mitigation);
     document.getElementById("res-crit").textContent = format(rawOutput * mitigation * criticalMultiplier);
-    document.getElementById("res-defense").textContent = format(effectiveDefense);
     const tankResult = document.getElementById("res-tank");
     if (tankResult) tankResult.textContent = format(damageReceived);
     document.getElementById("log-mitigation").textContent = `×${mitigation.toFixed(3)}`;
     document.getElementById("log-crit-mult").textContent = `×${criticalMultiplier.toFixed(2)} after resistance`;
-    document.getElementById("log-eff-def").textContent = "After penetration";
+    document.getElementById("log-mitigation").textContent = "Enemy defense not entered";
     updateCharts(rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, baseAttribute, effectiveDefense, flatPenetration, outputBonus, enemyDefense, mitigation, incomingDamage, damageReduction, damageReceived);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;

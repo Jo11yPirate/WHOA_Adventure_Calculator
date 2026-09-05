@@ -217,7 +217,6 @@ def read_universal(form):
         "base_attribute",
         "attack_bonus_percentage",
         "bonus_percentage",
-        "enemy_defense",
         "penetration_percentage",
         "flat_penetration",
         "crit_damage_bonus_percentage",
@@ -231,6 +230,7 @@ def read_universal(form):
         if value is None or value < 0:
             raise ValueError(f"{field.replace('_', ' ').title()} must be 0 or greater.")
         values[field] = value
+    values["enemy_defense"] = 0.0
     return calculate_universal(values)
 
 
