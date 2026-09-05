@@ -71,25 +71,6 @@
               {% endfor %}
             </div>
           </div>
-          <div class="stats-section warrior-only">
-            <h2>Warrior Survivability</h2>
-            <div class="form-row">
-              <div>
-                <label for="incoming_damage">Incoming Boss Damage</label>
-                <input id="incoming_damage" name="incoming_damage" type="number" min="0" step="0.01" value="{{ request.form.get('incoming_damage', '') }}">
-              </div>
-            </div>
-            <h2>Compare An Upgrade</h2>
-            <div class="form-row">
-              {% for field, label in [
-                ("upgrade_hp", "HP Gained"), ("upgrade_defense", "Defense Gained"),
-                ("upgrade_evasion", "Evasion Gained"), ("upgrade_crit_resistance", "Crit Res Gained"),
-                ("upgrade_damage_reduction", "Damage Reduction Gained")
-              ] %}
-                <div><label for="{{ field }}">{{ label }}</label><input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}"></div>
-              {% endfor %}
-            </div>
-          </div>
           <input type="hidden" name="calculator" value="universal">
           <div class="form-actions">
             <button type="submit">Calculate Authoritative Stats <span aria-hidden="true">→</span></button>
@@ -111,7 +92,6 @@
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
                 <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
-                <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
                 <div class="screen-equation">Normal <strong id="screen-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong></div>
@@ -130,11 +110,6 @@
                 <div class="screen-equation">Pen&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
                 <div class="screen-equation">Bonus&nbsp; <strong id="screen-bonus">0%</strong></div>
               </div>
-              <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
-                <div class="screen-equation">Incoming <strong id="screen-incoming">0</strong></div>
-                <div class="screen-equation">Dmg Red&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
-                <div class="screen-equation">Taken&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
-              </div>
             </div>
             <div class="metric-grid">
               <article class="metric"><span>Raw Output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
@@ -143,30 +118,6 @@
               <article class="metric"><span>{% if selected_class == "Priest" %}Heal Crit{% else %}Critical Rate{% endif %}</span><strong id="res-critical-rate">{{ "%.2f"|format(stats.critical_rate) }}%</strong><small>{% if selected_class == "Priest" %}Crit ÷ (Attack + Penetration + Hit){% else %}Crit ÷ core output{% endif %}</small></article>
               {% if selected_class == "Priest" %}<article class="metric"><span>Heal Power (HPI)</span><strong id="res-heal-power">{{ "{:,.2f}".format(stats.heal_power) }}</strong><small>Attack + Hit + Penetration</small></article>{% endif %}
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">{{ "%.2f"|format(stats.estimated_accuracy) }}%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
-            </div>
-            <div class="recommendation warrior-only">
-              <p class="eyebrow">Warrior Survivability</p>
-              <p>Estimated damage received: <strong id="res-tank">{{ "{:,.0f}".format(stats.damage_received) }}</strong></p>
-              <p>Applied DMG Reduction: <strong>{{ "%.1f"|format(stats.damage_reduction_applied) }}%</strong> (90% internal cap)</p>
-              <div class="metric-grid warrior-metrics">
-                <article class="metric"><span>Effective HP</span><strong id="res-effective-hp">{{ "{:,.2f}".format(stats.effective_hp) }}</strong><small>HP ÷ (1 − Damage Reduction)</small></article>
-                <article class="metric"><span>Weighted Score</span><strong id="res-weighted-score">{{ "{:,.2f}".format(stats.weighted_score) }}</strong><small>Comparison metric</small></article>
-                <article class="metric"><span>HP Contribution</span><strong id="res-hp-contribution">{{ "{:,.2f}".format(stats.hp_contribution) }}</strong><small>HP × 0.0023</small></article>
-                <article class="metric"><span>Defense Contribution</span><strong id="res-defense-contribution">{{ "{:,.2f}".format(stats.defense_contribution) }}</strong><small>Defense × 1</small></article>
-                <article class="metric"><span>Evasion Contribution</span><strong id="res-evasion-contribution">{{ "{:,.2f}".format(stats.evasion_contribution) }}</strong><small>Evasion × 1</small></article>
-                <article class="metric"><span>Crit Res Contribution</span><strong id="res-crit-res-contribution">{{ "{:,.2f}".format(stats.crit_resistance_contribution) }}</strong><small>Crit Res × 1</small></article>
-                <article class="metric"><span>Upgrade Score Change</span><strong id="res-upgrade-score">{{ "{:+,.2f}".format(stats.upgrade_score_change) }}</strong><small>Compared with current stats</small></article>
-                <article class="metric"><span>Upgrade Effective HP</span><strong id="res-upgrade-hp">{{ "{:+,.2f}".format(stats.upgrade_effective_hp_change) }}</strong><small>Change after upgrade</small></article>
-              </div>
-              <div class="score-mix" aria-label="Warrior score mix">
-                <span>HP <strong id="mix-hp">0%</strong></span>
-                <span>Defense <strong id="mix-defense">0%</strong></span>
-                <span>Evasion <strong id="mix-evasion">0%</strong></span>
-                <span>Crit Res <strong id="mix-crit-res">0%</strong></span>
-              </div>
-              {% if stats.combo_output is defined %}<p>Full {{ stats.hit_count }}-hit combo: <strong>{{ "{:,.1f}".format(stats.combo_output) }}</strong></p>{% endif %}
-              {% if stats.life_steal_yield is defined %}<p>Estimated life-steal yield: <strong>{{ "{:,.1f}".format(stats.life_steal_yield) }}</strong></p>{% endif %}
-              <p class="muted">This uses the mitigation equation shown below.</p>
             </div>
           {% else %}
             <div class="section-heading">
@@ -178,7 +129,6 @@
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
                 <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
-                <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survival">Survival</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
                 <div class="screen-equation">Normal <strong id="screen-normal">0</strong></div>
@@ -197,11 +147,6 @@
                 <div class="screen-equation">Pen&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
                 <div class="screen-equation">Bonus&nbsp; <strong id="screen-bonus">0%</strong></div>
               </div>
-              <div class="screen-panel warrior-only" data-screen-panel="survival" role="tabpanel" hidden>
-                <div class="screen-equation">Incoming <strong id="screen-incoming">0</strong></div>
-                <div class="screen-equation">Dmg Red&nbsp; <strong id="screen-damage-reduction">0%</strong></div>
-                <div class="screen-equation">Taken&nbsp;&nbsp; <strong id="screen-taken">0</strong></div>
-              </div>
             </div>
             <div class="metric-grid">
               <article class="metric"><span>Raw Output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
@@ -211,12 +156,34 @@
               <article class="metric priest-only" hidden><span>Heal Power (HPI)</span><strong id="res-heal-power">0.00</strong><small>Attack + Hit + Penetration</small></article>
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">0.00%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
             </div>
-            <div class="recommendation warrior-only">
-              <p class="eyebrow">Tank Result</p>
-              <p>Estimated damage received: <strong id="res-tank">0</strong></p>
-              <p class="muted">Values update as you edit the inputs. Submit the form to validate them on the server.</p>
-            </div>
           {% endif %}
+        </section>
+
+        <section id="compare" class="app-page card guide" data-app-page="compare">
+          <div class="section-heading"><div><p class="eyebrow">Equipment Comparison</p><h2>Compare Current And New Stats</h2></div></div>
+          <p class="muted">Enter the stats gained by the equipment piece to see the resulting totals and changes.</p>
+          <div class="comparison-grid">
+            <div>
+              <h3>Current Stats</h3>
+              <div class="comparison-fields">
+                {% for field, label in [("base_attribute", "Attack"), ("stat_hp", "HP"), ("stat_crit", "Crit"), ("stat_hit", "Hit Rating"), ("stat_penetration", "Penetration"), ("stat_defense_rating", "Defense Rating"), ("stat_evasion", "Evasion"), ("stat_crit_resistance", "Crit Res")] %}
+                  <label>{{ label }}<input class="compare-current" data-stat="{{ field }}" type="number" min="0" step="0.01" placeholder="0"></label>
+                {% endfor %}
+              </div>
+            </div>
+            <div>
+              <h3>Equipment Stats</h3>
+              <div class="comparison-fields">
+                {% for field, label in [("base_attribute", "Attack"), ("stat_hp", "HP"), ("stat_crit", "Crit"), ("stat_hit", "Hit Rating"), ("stat_penetration", "Penetration"), ("stat_defense_rating", "Defense Rating"), ("stat_evasion", "Evasion"), ("stat_crit_resistance", "Crit Res")] %}
+                  <label>{{ label }}<input class="compare-item" data-stat="{{ field }}" type="number" min="0" step="0.01" placeholder="0"></label>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="comparison-results" aria-live="polite">
+            <h3>Comparison Result</h3>
+            <div id="comparison-output" class="metric-grid"><p class="muted">Enter current stats and equipment stats to compare them.</p></div>
+          </div>
         </section>
         <section class="visualization-summary">
           <div class="section-heading">
@@ -263,7 +230,7 @@
           <div class="section-heading"><div><p class="eyebrow">Formula Guide</p></div></div>
           <div class="formula-list">
             {% for name, formula in formula_guidance.items() %}
-              <div class="{{ 'warrior-only' if name == 'Tank damage received' else '' }}"><strong>{{ name }}</strong><code>{{ formula }}</code></div>
+              <div><strong>{{ name }}</strong><code>{{ formula }}</code></div>
             {% endfor %}
           </div>
         </div>
@@ -280,6 +247,7 @@
     </main>
     <nav class="quick-nav" aria-label="Quick navigation">
       <a href="#calculator-page" data-page-target="calculator"><span aria-hidden="true">▣</span><span>Base Stats</span></a>
+      <a href="#compare" data-page-target="compare"><span aria-hidden="true">⇄</span><span>Compare Stats</span></a>
       <a href="#visualization" data-page-target="visualization"><span aria-hidden="true">▥</span><span>Visualization</span></a>
       <a href="#reference" data-page-target="reference"><span aria-hidden="true">?</span><span>Reference</span></a>
     </nav>

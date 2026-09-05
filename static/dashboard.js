@@ -110,37 +110,6 @@ function updateClassReference(className) {
   });
 }
 
-function updateWarriorOnly(className) {
-  document.querySelectorAll(".warrior-only").forEach((element) => {
-    if (element.dataset.screenPanel) {
-      if (className !== "Warrior") element.hidden = true;
-    } else {
-      element.hidden = className !== "Warrior";
-    }
-
-  });
-  if (className !== "Warrior") {
-    const outputTab = document.querySelector('[data-screen-tab="output"]');
-    const outputPanel = document.querySelector('[data-screen-panel="output"]');
-    document.querySelectorAll(".screen-tab").forEach((tab) => {
-      const active = tab === outputTab;
-      tab.classList.toggle("is-active", active);
-      tab.setAttribute("aria-selected", active ? "true" : "false");
-    });
-    document.querySelectorAll(".screen-panel").forEach((panel) => {
-      const active = panel === outputPanel;
-      panel.classList.toggle("is-active", active);
-      panel.hidden = !active;
-    });
-    document.querySelectorAll('[data-screen-panel="survival"]').forEach((panel) => {
-      panel.hidden = true;
-    });
-    document.querySelectorAll('[data-screen-tab="survival"]').forEach((tab) => {
-      tab.setAttribute("aria-selected", "false");
-    });
-  }
-}
-
 function updatePriestOnly(className) {
   document.querySelectorAll(".priest-only").forEach((element) => {
     element.hidden = className !== "Priest";
@@ -153,6 +122,34 @@ function updatePriestOnly(className) {
     : "Crit ÷ core output";
 }
 
+function updateComparison() {
+  const current = {};
+  const item = {};
+  document.querySelectorAll(".compare-current").forEach((input) => {
+    current[input.dataset.stat] = Number(input.value) || 0;
+  });
+  document.querySelectorAll(".compare-item").forEach((input) => {
+    item[input.dataset.stat] = Number(input.value) || 0;
+  });
+  const output = document.getElementById("comparison-output");
+  const labels = {
+    base_attribute: "Attack",
+    stat_hp: "HP",
+    stat_crit: "Crit",
+    stat_hit: "Hit Rating",
+    stat_penetration: "Penetration",
+    stat_defense_rating: "Defense Rating",
+    stat_evasion: "Evasion",
+    stat_crit_resistance: "Crit Res",
+  };
+  output.innerHTML = Object.entries(labels).map(([stat, label]) => {
+    const before = current[stat] || 0;
+    const gained = item[stat] || 0;
+    const change = gained;
+    return `<article class="metric"><span>${label}</span><strong>${format(before + change)}</strong><small>${change >= 0 ? "+" : ""}${format(change)} from equipment</small></article>`;
+  }).join("");
+}
+
 function runRecalculationPipeline() {
   const error = document.getElementById("live-error");
   try {
@@ -161,32 +158,6 @@ function runRecalculationPipeline() {
     const penetrationRating = readNumber("stat_penetration");
     const hitRating = readNumber("stat_hit");
     const critRating = readNumber("stat_crit");
-    const incomingDamage = readOptionalNumber("incoming_damage");
-    const damageReduction = Math.min(readNumber("damage_reduction_percentage"), 90) / 100;
-    const defenseScore = readNumber("defense_score");
-    const defenseBonus = readNumber("defense_bonus_percentage") / 100;
-    const hp = readNumber("stat_hp") * (1 + readNumber("hp_bonus_percentage") / 100);
-    const defense = defenseScore * (1 + defenseBonus);
-    const evasion = readNumber("stat_evasion") * (1 + readNumber("evasion_bonus_percentage") / 100);
-    const critResistance = readNumber("stat_crit_resistance") * (1 + readNumber("crit_res_bonus_percentage") / 100);
-    const survivalDamageReduction = Math.min(99.99, readNumber("damage_reduction_percentage"));
-    const contributions = {
-      hp: hp * 0.0023,
-      defense,
-      evasion,
-      critResistance,
-    };
-    const weightedScore = Object.values(contributions).reduce((sum, value) => sum + value, 0);
-    const effectiveHp = hp / (1 - survivalDamageReduction / 100);
-    const upgradeHp = readOptionalNumber("upgrade_hp");
-    const upgradeDefense = readOptionalNumber("upgrade_defense");
-    const upgradeEvasion = readOptionalNumber("upgrade_evasion");
-    const upgradeCritResistance = readOptionalNumber("upgrade_crit_resistance");
-    const upgradeDamageReduction = readOptionalNumber("upgrade_damage_reduction");
-    const upgradedScore = (hp + upgradeHp) * 0.0023 + defense + upgradeDefense +
-      evasion + upgradeEvasion + critResistance + upgradeCritResistance;
-    const upgradedDamageReduction = Math.min(99.99, survivalDamageReduction + upgradeDamageReduction);
-    const upgradedEffectiveHp = (hp + upgradeHp) / (1 - upgradedDamageReduction / 100);
     const isHealing = document.getElementById("class-select").value === "Priest";
     const coreOutput = baseAttribute + penetrationRating + (isHealing ? hitRating : 0);
     const rawOutput = coreOutput * (1 + outputBonus);
@@ -195,8 +166,6 @@ function runRecalculationPipeline() {
     const criticalMultiplier = 2;
     const criticalRate = coreOutput ? (critRating / coreOutput) * 100 : 0;
     const estimatedAccuracy = Math.min(100, hitRating);
-    const damageReceived = (incomingDamage * (1 - damageReduction)) /
-      (1 + defenseScore * defenseBonus);
     const critEvaluation = effectiveStat("Critical_Rate_Percentage", critRating);
 
     document.getElementById("res-raw").textContent = format(rawOutput);
@@ -205,24 +174,10 @@ function runRecalculationPipeline() {
     document.getElementById("res-critical-rate").textContent = `${criticalRate.toFixed(2)}%`;
     setText("res-heal-power", coreOutput.toFixed(2));
     document.getElementById("res-estimated-accuracy").textContent = `${estimatedAccuracy.toFixed(2)}%`;
-    const tankResult = document.getElementById("res-tank");
-    if (tankResult) tankResult.textContent = format(damageReceived);
     document.getElementById("log-mitigation").textContent = `×${mitigation.toFixed(3)}`;
     document.getElementById("log-crit-mult").textContent = `×${criticalMultiplier.toFixed(2)} after resistance`;
     document.getElementById("log-mitigation").textContent = "Enemy defense not entered";
-    setText("res-effective-hp", format(effectiveHp));
-    setText("res-weighted-score", format(weightedScore));
-    setText("res-hp-contribution", format(contributions.hp));
-    setText("res-defense-contribution", format(contributions.defense));
-    setText("res-evasion-contribution", format(contributions.evasion));
-    setText("res-crit-res-contribution", format(contributions.critResistance));
-    setText("res-upgrade-score", `${upgradedScore - weightedScore >= 0 ? "+" : ""}${format(upgradedScore - weightedScore)}`);
-    setText("res-upgrade-hp", `${upgradedEffectiveHp - effectiveHp >= 0 ? "+" : ""}${format(upgradedEffectiveHp - effectiveHp)}`);
-    setText("mix-hp", `${((contributions.hp / weightedScore) * 100).toFixed(2)}%`);
-    setText("mix-defense", `${((contributions.defense / weightedScore) * 100).toFixed(2)}%`);
-    setText("mix-evasion", `${((contributions.evasion / weightedScore) * 100).toFixed(2)}%`);
-    setText("mix-crit-res", `${((contributions.critResistance / weightedScore) * 100).toFixed(2)}%`);
-    updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, readNumber("stat_defense_rating"), penetrationRating, outputBonus, 0, mitigation, incomingDamage, damageReduction, damageReceived);
+    updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, 0, penetrationRating, outputBonus, 0, mitigation, 0, 0, 0);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;
   } catch (validationError) {
@@ -268,6 +223,10 @@ pageLinks.forEach((link) => {
 });
 
 showAppPage("calculator");
+document.querySelectorAll(".compare-current, .compare-item").forEach((input) => {
+  input.addEventListener("input", updateComparison);
+});
+updateComparison();
 
 const calculatorForm = document.querySelector(".stats-form");
 if (calculatorForm) {
@@ -287,7 +246,6 @@ if (calculatorForm) {
     runRecalculationPipeline();
   });
   classSelect.addEventListener("change", () => updateClassReference(classSelect.value));
-  classSelect.addEventListener("change", () => updateWarriorOnly(classSelect.value));
   classSelect.addEventListener("change", () => updatePriestOnly(classSelect.value));
   calculatorForm.querySelectorAll("input, select").forEach((input) => {
     input.addEventListener("input", () => {
@@ -297,6 +255,5 @@ if (calculatorForm) {
   });
   runRecalculationPipeline();
   updateClassReference(classSelect.value);
-  updateWarriorOnly(classSelect.value);
   updatePriestOnly(classSelect.value);
 }

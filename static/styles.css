@@ -694,6 +694,39 @@ th:last-child, td:last-child {
   padding: 14px;
 }
 
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.comparison-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.comparison-fields label {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.comparison-fields input {
+  width: 100%;
+}
+
+.comparison-results {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.comparison-results h3 {
+  margin: 0 0 8px;
+}
+
 .reference-section + .reference-section {
   margin-top: 14px;
 }
