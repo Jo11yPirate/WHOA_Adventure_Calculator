@@ -176,7 +176,7 @@ function runRecalculationPipeline() {
     document.getElementById("res-estimated-accuracy").textContent = `${estimatedAccuracy.toFixed(2)}%`;
     document.getElementById("log-mitigation").textContent = `×${mitigation.toFixed(3)}`;
     document.getElementById("log-crit-mult").textContent = `×${criticalMultiplier.toFixed(2)} after resistance`;
-    document.getElementById("log-mitigation").textContent = "Enemy defense not entered";
+    document.getElementById("log-mitigation").textContent = "Enemy Defense Unknown";
     updateCharts(rawOutput, rawOutput, rawOutput * criticalMultiplier, baseAttribute, 0, penetrationRating, outputBonus, 0, mitigation, 0, 0, 0);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;
