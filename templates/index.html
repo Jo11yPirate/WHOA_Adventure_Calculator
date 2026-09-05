@@ -88,10 +88,12 @@
               <span class="calculator-status">Ready</span>
             </div>
             <div class="calculator-screen">
-              <div class="screen-topline"><span>Base Stats</span><span id="screen-mode">Live</span></div>
+              <div class="screen-topline"><span></span><span id="screen-mode">Live</span></div>
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
-                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
+                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Breakdown</button>
+                <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survivability" {% if selected_class != "Warrior" %}hidden{% endif %}>Survivability</button>
+                <button type="button" class="screen-tab combat-rate-only" role="tab" aria-selected="false" data-screen-tab="rate" {% if selected_class == "Warrior" %}hidden{% endif %}>{% if selected_class == "Priest" %}HPS{% else %}DPS{% endif %}</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
                 <div class="screen-equation">Normal <strong id="screen-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong></div>
@@ -106,9 +108,39 @@
                 </svg>
               </div>
               <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
-                <div class="screen-equation">Attack <strong id="screen-attack">0</strong></div>
-                <div class="screen-equation">Pen&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
-                <div class="screen-equation">Bonus&nbsp; <strong id="screen-bonus">0%</strong></div>
+                <div class="breakdown-pie-layout">
+                  <div id="breakdown-pie" class="breakdown-pie" role="img" aria-label="Class stat composition pie chart"></div>
+                  <div id="breakdown-pie-legend" class="breakdown-pie-legend"></div>
+                </div>
+              </div>
+              <div class="screen-panel" data-screen-panel="survivability" role="tabpanel" hidden>
+                <svg class="survivability-graph" viewBox="0 0 520 150" role="img" aria-label="Warrior survivability comparison line graph">
+                  <path d="M40 12V126H500" class="graph-axis"></path>
+                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                  <polyline id="survivability-line" class="survivability-line" points="40,126 190,126 340,126 490,126"></polyline>
+                  <circle id="survivability-point-1" class="survivability-point" cx="40" cy="126" r="4"></circle>
+                  <circle id="survivability-point-2" class="survivability-point" cx="190" cy="126" r="4"></circle>
+                  <circle id="survivability-point-3" class="survivability-point" cx="340" cy="126" r="4"></circle>
+                  <circle id="survivability-point-4" class="survivability-point" cx="490" cy="126" r="4"></circle>
+                  <text x="22" y="143" class="graph-label">HP</text>
+                  <text x="155" y="143" class="graph-label">EHP</text>
+                  <text x="300" y="143" class="graph-label">Resilience</text>
+                  <text x="465" y="143" class="graph-label">Dodge</text>
+                </svg>
+              </div>
+              <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
+                <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Per-second output line graph">
+                  <path d="M40 12V126H500" class="graph-axis"></path>
+                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                  <polyline class="rate-line" points="40,126 265,126 490,126"></polyline>
+                  <circle class="rate-point" cx="40" cy="126" r="4"></circle>
+                  <circle class="rate-point" cx="265" cy="126" r="4"></circle>
+                  <circle class="rate-point" cx="490" cy="126" r="4"></circle>
+                  <text x="22" y="143" class="graph-label">Base</text>
+                  <text x="245" y="143" class="graph-label">Normal</text>
+                  <text x="465" y="143" class="graph-label">Crit</text>
+                </svg>
+                <small class="graph-assumption">Assumes 1 action per second</small>
               </div>
             </div>
             <div class="metric-grid">
@@ -122,6 +154,7 @@
               <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>HP Contribution</span><strong id="res-hp-contribution">{{ "%.2f"|format(stats.warrior_hp_contribution) }}%</strong><small>Raw HP portion of effective HP</small></article>
               <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>Resilience</span><strong id="res-resilience">{{ "%.2f"|format(stats.warrior_resilience) }}</strong><small>Estimated hits survived</small></article>
               <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>Dodge Percentage</span><strong id="res-dodge">{{ "%.2f"|format(stats.warrior_dodge) }}%</strong><small>Assumes 5,000 enemy Hit</small></article>
+              <article class="metric warrior-only" {% if selected_class != "Warrior" %}hidden{% endif %}><span>Damage Reduction</span><strong id="res-damage-reduction">{{ "%.2f"|format(stats.damage_reduction_percentage) }}%</strong><small>Entered character value</small></article>
             </div>
           {% else %}
             <div class="section-heading">
@@ -129,10 +162,12 @@
               <span class="calculator-status">Ready</span>
             </div>
             <div class="calculator-screen">
-              <div class="screen-topline"><span>Base Stats</span><span id="screen-mode">Live</span></div>
+              <div class="screen-topline"><span></span><span id="screen-mode">Live</span></div>
               <div class="screen-tabs" role="tablist" aria-label="Visualization metrics">
                 <button type="button" class="screen-tab is-active" role="tab" aria-selected="true" data-screen-tab="output">Output</button>
-                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Profile</button>
+                <button type="button" class="screen-tab" role="tab" aria-selected="false" data-screen-tab="profile">Breakdown</button>
+                <button type="button" class="screen-tab warrior-only" role="tab" aria-selected="false" data-screen-tab="survivability" hidden>Survivability</button>
+                <button type="button" class="screen-tab combat-rate-only" role="tab" aria-selected="false" data-screen-tab="rate" hidden>DPS</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
                 <div class="screen-equation">Normal <strong id="screen-normal">0</strong></div>
@@ -147,9 +182,39 @@
                 </svg>
               </div>
               <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
-                <div class="screen-equation">Attack <strong id="screen-attack">0</strong></div>
-                <div class="screen-equation">Pen&nbsp;&nbsp;&nbsp; <strong id="screen-penetration">0</strong></div>
-                <div class="screen-equation">Bonus&nbsp; <strong id="screen-bonus">0%</strong></div>
+                <div class="breakdown-pie-layout">
+                  <div id="breakdown-pie" class="breakdown-pie" role="img" aria-label="Class stat composition pie chart"></div>
+                  <div id="breakdown-pie-legend" class="breakdown-pie-legend"></div>
+                </div>
+              </div>
+              <div class="screen-panel" data-screen-panel="survivability" role="tabpanel" hidden>
+                <svg class="survivability-graph" viewBox="0 0 520 150" role="img" aria-label="Warrior survivability comparison line graph">
+                  <path d="M40 12V126H500" class="graph-axis"></path>
+                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                  <polyline id="survivability-line" class="survivability-line" points="40,126 190,126 340,126 490,126"></polyline>
+                  <circle id="survivability-point-1" class="survivability-point" cx="40" cy="126" r="4"></circle>
+                  <circle id="survivability-point-2" class="survivability-point" cx="190" cy="126" r="4"></circle>
+                  <circle id="survivability-point-3" class="survivability-point" cx="340" cy="126" r="4"></circle>
+                  <circle id="survivability-point-4" class="survivability-point" cx="490" cy="126" r="4"></circle>
+                  <text x="22" y="143" class="graph-label">HP</text>
+                  <text x="155" y="143" class="graph-label">EHP</text>
+                  <text x="300" y="143" class="graph-label">Resilience</text>
+                  <text x="465" y="143" class="graph-label">Dodge</text>
+                </svg>
+              </div>
+              <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
+                <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Per-second output line graph">
+                  <path d="M40 12V126H500" class="graph-axis"></path>
+                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                  <polyline class="rate-line" points="40,126 265,126 490,126"></polyline>
+                  <circle class="rate-point" cx="40" cy="126" r="4"></circle>
+                  <circle class="rate-point" cx="265" cy="126" r="4"></circle>
+                  <circle class="rate-point" cx="490" cy="126" r="4"></circle>
+                  <text x="22" y="143" class="graph-label">Base</text>
+                  <text x="245" y="143" class="graph-label">Normal</text>
+                  <text x="465" y="143" class="graph-label">Crit</text>
+                </svg>
+                <small class="graph-assumption">Assumes 1 action per second</small>
               </div>
             </div>
             <div class="metric-grid">
@@ -163,6 +228,7 @@
               <article class="metric warrior-only" hidden><span>HP Contribution</span><strong id="res-hp-contribution">0.00%</strong><small>Raw HP portion of effective HP</small></article>
               <article class="metric warrior-only" hidden><span>Resilience</span><strong id="res-resilience">0.00</strong><small>Estimated hits survived</small></article>
               <article class="metric warrior-only" hidden><span>Dodge Percentage</span><strong id="res-dodge">0.00%</strong><small>Assumes 5,000 enemy Hit</small></article>
+              <article class="metric warrior-only" hidden><span>Damage Reduction</span><strong id="res-damage-reduction">0.00%</strong><small>Entered character value</small></article>
             </div>
           {% endif %}
         </section>
@@ -260,8 +326,8 @@
     </main>
     <nav class="quick-nav" aria-label="Quick navigation">
       <a href="#calculator-page" data-page-target="calculator"><span aria-hidden="true">▣</span><span>Base Stats</span></a>
-      <a href="#compare" data-page-target="compare"><span aria-hidden="true">⇄</span><span>Compare Stats</span></a>
       <a href="#visualization" data-page-target="visualization"><span aria-hidden="true">▥</span><span>Visualization</span></a>
+      <a href="#compare" data-page-target="compare"><span aria-hidden="true">⇄</span><span>Compare Stats</span></a>
       <a href="#reference" data-page-target="reference"><span aria-hidden="true">?</span><span>Reference</span></a>
     </nav>
   </body>

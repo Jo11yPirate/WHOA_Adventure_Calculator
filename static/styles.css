@@ -235,11 +235,103 @@ h2 {
   text-shadow: 0 0 10px rgba(255, 159, 67, .28);
 }
 
+.breakdown-pie-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 88px;
+  margin: 0 auto;
+}
+
+.breakdown-pie {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 76px;
+  border: 2px solid #3c3026;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) 0 100%);
+}
+
+.breakdown-pie-legend {
+  display: grid;
+  gap: 3px;
+  min-width: 96px;
+  color: #b5b5b5;
+  font-size: 9px;
+}
+
+.breakdown-pie-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breakdown-pie-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.breakdown-pie-legend strong {
+  color: var(--accent);
+}
+
 .screen-graph {
   display: block;
   height: 76px;
   margin-top: 10px;
   width: 100%;
+}
+
+.survivability-graph {
+  display: block;
+  width: 100%;
+  height: 76px;
+  margin-top: 5px;
+}
+
+.survivability-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.survivability-point {
+  fill: var(--accent);
+  stroke: #211e1b;
+  stroke-width: 2;
+}
+
+.rate-graph {
+  display: block;
+  width: 100%;
+  height: 76px;
+  margin-top: 5px;
+}
+
+.rate-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rate-point {
+  fill: var(--accent);
+  stroke: #211e1b;
+  stroke-width: 2;
+}
+
+.graph-assumption {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 9px;
+  text-align: right;
 }
 
 .graph-axis {

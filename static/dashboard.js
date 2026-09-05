@@ -109,6 +109,59 @@ function setBar(id, value, maximum) {
   if (bar) bar.style.width = `${maximum ? Math.min(100, (value / maximum) * 100) : 0}%`;
 }
 
+function updateBreakdownPie(className, attack, penetration, hit, hp, defense, evasion) {
+  const isWarrior = className === "Warrior";
+  const entries = isWarrior
+    ? [["HP", hp], ["Defense", defense], ["Evasion", evasion]]
+    : className === "Priest"
+      ? [["Attack", attack], ["Penetration", penetration], ["Hit", hit]]
+      : [["Attack", attack], ["Penetration", penetration]];
+  const total = entries.reduce((sum, [, value]) => sum + value, 0);
+  const colors = ["#ffbd75", "#ff9f43", "#e97b3f"];
+  let offset = 0;
+  const stops = entries.map(([label, value], index) => {
+    const start = offset;
+    offset += total ? (value / total) * 100 : 0;
+    return `${colors[index]} ${start}% ${offset}%`;
+  });
+  const pie = document.getElementById("breakdown-pie");
+  const legend = document.getElementById("breakdown-pie-legend");
+  if (pie) pie.style.background = `conic-gradient(${stops.join(", ")})`;
+  if (legend) {
+    legend.innerHTML = entries.map(([label, value], index) =>
+      `<span><i style="background:${colors[index]}"></i>${label} <strong>${format(value)}</strong></span>`
+    ).join("");
+  }
+}
+
+function updateSurvivabilityGraph(values) {
+  const maximum = Math.max(...values, 1);
+  const xPositions = [40, 190, 340, 490];
+  const points = values.map((value, index) => {
+    const y = 126 - (value / maximum) * 92;
+    return `${xPositions[index]},${y}`;
+  });
+  const line = document.getElementById("survivability-line");
+  if (line) line.setAttribute("points", points.join(" "));
+  values.forEach((value, index) => {
+    const point = document.getElementById(`survivability-point-${index + 1}`);
+    if (point) {
+      point.setAttribute("cy", String(126 - (value / maximum) * 92));
+    }
+  });
+}
+
+function updateRateGraph(values) {
+  const maximum = Math.max(...values, 1);
+  const yValues = values.map((value) => 126 - (value / maximum) * 92);
+  document.querySelectorAll(".rate-line").forEach((line) => {
+    line.setAttribute("points", yValues.map((y, index) => `${[40, 265, 490][index]},${y}`).join(" "));
+  });
+  document.querySelectorAll(".rate-point").forEach((point, index) => {
+    if (yValues[index] !== undefined) point.setAttribute("cy", String(yValues[index]));
+  });
+}
+
 function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, penetration, outputBonus, enemyDefense, mitigation, incomingDamage, damageReduction, damageReceived) {
   const outputMax = Math.max(rawOutput, criticalOutput, 1);
   setBar("bar-normal", normalOutput, outputMax);
@@ -137,9 +190,6 @@ function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, 
     criticalBar.setAttribute("y", 126 - criticalHeight);
     criticalBar.setAttribute("height", criticalHeight);
   }
-  setText("screen-attack", format(attack));
-  setText("screen-penetration", format(penetration));
-  setText("screen-bonus", `${(outputBonus * 100).toFixed(1)}%`);
 }
 
 function updateClassReference(className) {
@@ -160,6 +210,12 @@ function updatePriestOnly(className) {
     : "Crit ÷ core output";
   document.querySelectorAll(".warrior-only").forEach((element) => {
     element.hidden = className !== "Warrior";
+  });
+  document.querySelectorAll(".combat-rate-only").forEach((element) => {
+    element.hidden = className === "Warrior";
+    if (element.matches("button")) {
+      element.textContent = className === "Priest" ? "HPS" : "DPS";
+    }
   });
 }
 
@@ -226,6 +282,27 @@ function runRecalculationPipeline() {
     setText("res-hp-contribution", `${(incomingDamageMultiplier * 100).toFixed(2)}%`);
     setText("res-resilience", (effectiveHp / incomingHitBaseline).toFixed(2));
     setText("res-dodge", `${Math.min(100, evasion / enemyHitBaseline * 100).toFixed(2)}%`);
+    setText("res-damage-reduction", `${(damageReduction * 100).toFixed(2)}%`);
+    updateRateGraph([
+      coreOutput,
+      rawOutput * mitigation,
+      rawOutput * mitigation * criticalMultiplier,
+    ]);
+    updateSurvivabilityGraph([
+      hp,
+      effectiveHp,
+      effectiveHp / incomingHitBaseline,
+      Math.min(100, evasion / enemyHitBaseline * 100),
+    ]);
+    updateBreakdownPie(
+      document.getElementById("class-select").value,
+      baseAttribute,
+      penetrationRating,
+      hitRating,
+      hp,
+      defense,
+      evasion,
+    );
     setText("screen-normal", format(rawOutput * mitigation));
     setText("screen-critical", format(rawOutput * mitigation * criticalMultiplier));
     setText("log-mitigation", `Assumes ${enemyDefenseBaseline.toLocaleString()} enemy Defense`);
