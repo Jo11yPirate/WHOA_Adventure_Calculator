@@ -223,7 +223,10 @@ pageLinks.forEach((link) => {
   });
 });
 
-showAppPage("calculator");
+const initialPage = window.location.hash.slice(1);
+showAppPage(["calculator-page", "compare", "visualization", "reference"].includes(initialPage)
+  ? (initialPage === "calculator-page" ? "calculator" : initialPage)
+  : "calculator");
 document.querySelectorAll(".compare-current, .compare-item").forEach((input) => {
   input.addEventListener("input", updateComparison);
 });
