@@ -180,6 +180,7 @@ function runRecalculationPipeline() {
     const effectiveDefense = 0;
     const mitigation = 1;
     const criticalMultiplier = 2;
+    const criticalRate = coreOutput ? (critRating / coreOutput) * 100 : 0;
     const damageReceived = (incomingDamage * (1 - damageReduction)) /
       (1 + defenseScore * defenseBonus);
     const critEvaluation = effectiveStat("Critical_Rate_Percentage", critRating);
@@ -187,6 +188,7 @@ function runRecalculationPipeline() {
     document.getElementById("res-raw").textContent = format(rawOutput);
     document.getElementById("res-normal").textContent = format(rawOutput * mitigation);
     document.getElementById("res-crit").textContent = format(rawOutput * mitigation * criticalMultiplier);
+    document.getElementById("res-critical-rate").textContent = `${criticalRate.toFixed(2)}%`;
     const tankResult = document.getElementById("res-tank");
     if (tankResult) tankResult.textContent = format(damageReceived);
     document.getElementById("log-mitigation").textContent = `×${mitigation.toFixed(3)}`;

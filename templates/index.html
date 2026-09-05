@@ -140,6 +140,7 @@
               <article class="metric"><span>Raw output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
               <article class="metric"><span>Normal output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Enemy defense not entered</small></article>
               <article class="metric"><span>Critical output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
+              <article class="metric"><span>Critical Rate</span><strong id="res-critical-rate">{{ "%.2f"|format(stats.critical_rate) }}%</strong><small>Crit ÷ core output</small></article>
             </div>
             <div class="recommendation warrior-only">
               <p class="eyebrow">Warrior Survivability</p>
@@ -204,6 +205,7 @@
               <article class="metric"><span>Raw output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
               <article class="metric"><span>Normal output</span><strong id="res-normal">0</strong><small id="log-mitigation">Enemy defense not entered</small></article>
               <article class="metric"><span>Critical output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
+              <article class="metric"><span>Critical Rate</span><strong id="res-critical-rate">0.00%</strong><small>Crit ÷ core output</small></article>
             </div>
             <div class="recommendation warrior-only">
               <p class="eyebrow">Tank result</p>
