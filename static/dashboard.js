@@ -41,6 +41,29 @@ function setText(id, value) {
   if (element) element.textContent = value;
 }
 
+const calculatorStorageKey = "whoa-adventure-calculator-stats";
+
+function saveCalculatorState(form, classSelect) {
+  const state = {
+    className: classSelect.value,
+    fields: Object.fromEntries(
+      [...form.querySelectorAll('input[type="number"]')].map((input) => [input.id, input.value]),
+    ),
+  };
+  localStorage.setItem(calculatorStorageKey, JSON.stringify(state));
+}
+
+function restoreCalculatorState(form, classSelect) {
+  const saved = localStorage.getItem(calculatorStorageKey);
+  if (!saved) return;
+  const state = JSON.parse(saved);
+  if (state.className) classSelect.value = state.className;
+  Object.entries(state.fields || {}).forEach(([id, value]) => {
+    const input = document.getElementById(id);
+    if (input) input.value = value;
+  });
+}
+
 function format(value) {
   return Math.round(value).toLocaleString();
 }
@@ -234,17 +257,25 @@ const calculatorForm = document.querySelector(".stats-form");
 if (calculatorForm) {
   const classSelect = document.getElementById("class-select");
   const clearStatsButton = document.getElementById("clear-stats");
+  restoreCalculatorState(calculatorForm, classSelect);
   clearStatsButton.addEventListener("click", () => {
     calculatorForm.querySelectorAll('input[type="number"]').forEach((input) => {
       input.value = "";
     });
+    localStorage.removeItem(calculatorStorageKey);
     document.getElementById("live-error").hidden = true;
   });
-  classSelect.addEventListener("change", runRecalculationPipeline);
+  classSelect.addEventListener("change", () => {
+    saveCalculatorState(calculatorForm, classSelect);
+    runRecalculationPipeline();
+  });
   classSelect.addEventListener("change", () => updateClassReference(classSelect.value));
   classSelect.addEventListener("change", () => updateWarriorOnly(classSelect.value));
   calculatorForm.querySelectorAll("input, select").forEach((input) => {
-    input.addEventListener("input", runRecalculationPipeline);
+    input.addEventListener("input", () => {
+      saveCalculatorState(calculatorForm, classSelect);
+      runRecalculationPipeline();
+    });
   });
   runRecalculationPipeline();
   updateClassReference(classSelect.value);
