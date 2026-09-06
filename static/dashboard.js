@@ -309,7 +309,12 @@ function updatePriestOnly(className) {
     title.hidden = isHealing;
     title.style.display = isHealing ? "none" : "";
   });
-  document.querySelectorAll(".hps-line-chart, .hps-lines-title, .hps-line-legend").forEach((element) => { element.hidden = !isHealing; });
+  document.querySelectorAll(".hps-line-chart, .hps-lines-title, .hps-line-legend").forEach((element) => {
+    element.hidden = !isHealing;
+    element.style.display = isHealing
+      ? element.classList.contains("hps-line-legend") ? "flex" : "block"
+      : "none";
+  });
   document.querySelectorAll(".dps-radar-title").forEach((title) => {
     title.textContent = `${isHealing ? "HPS" : "DPS"} Combat Profile`;
   });

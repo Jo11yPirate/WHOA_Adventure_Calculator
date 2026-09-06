@@ -488,6 +488,12 @@ h2 {
   margin: 4px auto 0;
 }
 
+.hps-line-chart[hidden],
+.hps-lines-title[hidden],
+.hps-line-legend[hidden] {
+  display: none !important;
+}
+
 .hps-line-legend:not([hidden]) {
   display: flex;
   justify-content: center;
