@@ -20,9 +20,14 @@ function effectiveStat(statName, rawValue) {
 function readNumber(id) {
   const input = document.getElementById(id);
   const value = Number(input.value);
+  const label = input.labels?.[0]?.textContent.trim() || input.name;
   if (!Number.isFinite(value) || value < 0) {
-    throw new Error(`${input.labels[0].textContent} must be 0 or greater.`);
+    input.setAttribute("aria-invalid", "true");
+    input.setAttribute("aria-describedby", "live-error");
+    throw new Error(`${label} must be 0 or greater.`);
   }
+  input.setAttribute("aria-invalid", "false");
+  input.removeAttribute("aria-describedby");
   return value;
 }
 
@@ -31,14 +36,20 @@ function readOptionalNumber(id) {
   const value = Number(input.value);
   if (input.value === "") {
     input.classList.remove("input-error");
+    input.setAttribute("aria-invalid", "false");
     return 0;
   }
   if (!Number.isFinite(value) || value < 0) {
     input.classList.add("input-error");
-    input.title = `${input.labels[0].textContent}: enter 0 or greater.`;
-    throw new Error(`${input.labels[0].textContent} must be 0 or greater.`);
+    const label = input.labels?.[0]?.textContent.trim() || input.name;
+    input.setAttribute("aria-invalid", "true");
+    input.setAttribute("aria-describedby", "live-error");
+    input.title = `${label}: enter 0 or greater.`;
+    throw new Error(`${label} must be 0 or greater.`);
   }
   input.classList.remove("input-error");
+  input.setAttribute("aria-invalid", "false");
+  input.removeAttribute("aria-describedby");
   return value;
 }
 
@@ -556,19 +567,39 @@ function runRecalculationPipeline() {
   }
 }
 
+function activateScreenTab(tab, moveFocus = false) {
+  const screen = tab.closest(".calculator-screen");
+  const target = tab.dataset.screenTab;
+  screen.querySelectorAll(".screen-tab").forEach((button) => {
+    const active = button === tab;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+    button.tabIndex = active ? 0 : -1;
+  });
+  screen.querySelectorAll(".screen-panel").forEach((panel) => {
+    const active = panel.dataset.screenPanel === target;
+    panel.hidden = !active;
+    panel.classList.toggle("is-active", active);
+  });
+  if (moveFocus) tab.focus();
+}
+
 document.querySelectorAll(".screen-tab").forEach((tab) => {
+  tab.tabIndex = tab.getAttribute("aria-selected") === "true" ? 0 : -1;
   tab.addEventListener("click", () => {
-    const screen = tab.closest(".calculator-screen");
-    const target = tab.dataset.screenTab;
-    screen.querySelectorAll(".screen-tab").forEach((button) => {
-      const active = button === tab;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-selected", active ? "true" : "false");
-    });
-    screen.querySelectorAll(".screen-panel").forEach((panel) => {
-      panel.hidden = panel.dataset.screenPanel !== target;
-      panel.classList.toggle("is-active", panel.dataset.screenPanel === target);
-    });
+    activateScreenTab(tab);
+  });
+  tab.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const tabs = [...tab.closest(".screen-tabs").querySelectorAll(".screen-tab:not([hidden])")];
+    const index = tabs.indexOf(tab);
+    const nextIndex = event.key === "Home"
+      ? 0
+      : event.key === "End"
+        ? tabs.length - 1
+        : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    activateScreenTab(tabs[nextIndex], true);
   });
 });
 
@@ -576,11 +607,16 @@ const appPages = document.querySelectorAll("[data-app-page]");
 const pageLinks = document.querySelectorAll("[data-page-target]");
 function showAppPage(pageName) {
   appPages.forEach((page) => {
-    page.hidden = page.dataset.appPage !== pageName;
-    page.classList.toggle("is-page-active", page.dataset.appPage === pageName);
+    const isActive = page.dataset.appPage === pageName;
+    page.hidden = !isActive;
+    page.setAttribute("aria-hidden", String(!isActive));
+    page.classList.toggle("is-page-active", isActive);
   });
   pageLinks.forEach((link) => {
-    link.classList.toggle("is-active", link.dataset.pageTarget === pageName);
+    const active = link.dataset.pageTarget === pageName;
+    link.classList.toggle("is-active", active);
+    if (active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
   });
 }
 
@@ -660,15 +696,26 @@ document.querySelectorAll("[data-page-actions]").forEach((actions) => {
 pageLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
     event.preventDefault();
-    showAppPage(link.dataset.pageTarget);
-    history.replaceState(null, "", link.hash);
+    if (window.location.hash === link.hash) {
+      syncPageFromHash();
+      return;
+    }
+    window.location.hash = link.hash;
   });
 });
 
-const initialPage = window.location.hash.slice(1);
-showAppPage(["calculator-page", "compare", "visualization", "reference"].includes(initialPage)
-  ? (initialPage === "calculator-page" ? "calculator" : initialPage)
-  : "calculator");
+function pageNameFromHash() {
+  const hash = window.location.hash.slice(1);
+  if (hash === "calculator-page") return "calculator";
+  return ["compare", "visualization", "reference"].includes(hash) ? hash : "calculator";
+}
+
+function syncPageFromHash() {
+  showAppPage(pageNameFromHash());
+}
+
+syncPageFromHash();
+window.addEventListener("hashchange", syncPageFromHash);
 document.querySelectorAll(".compare-current, .compare-item").forEach((input) => {
   input.addEventListener("input", () => {
     saveComparisonState();
@@ -700,6 +747,9 @@ if (calculatorForm) {
     if (!window.confirm("Clear all entered stats? This cannot be undone.")) return;
     calculatorForm.querySelectorAll('input[type="number"]').forEach((input) => {
       input.value = "";
+      input.classList.remove("input-error");
+      input.setAttribute("aria-invalid", "false");
+      input.removeAttribute("aria-describedby");
     });
     localStorage.removeItem(calculatorStorageKey);
     clearComparisonFields(".compare-current, .compare-item");
@@ -720,8 +770,7 @@ if (calculatorForm) {
   calculatorForm.addEventListener("submit", (event) => {
     event.preventDefault();
     if (runRecalculationPipeline()) {
-      showAppPage("visualization");
-      history.replaceState(null, "", "#visualization");
+      window.location.hash = "#visualization";
     }
   });
   runRecalculationPipeline();

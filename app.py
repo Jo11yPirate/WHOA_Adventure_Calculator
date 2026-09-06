@@ -28,9 +28,9 @@ BUILD_GUIDANCE = {
 }
 
 CLASS_GUIDANCE = {
-    "Priest": "Attack/Crit is the general healing and DPS direction. Around 75% healing crit, prioritize Attack > Hit ≈ Crit > Penetration.",
-    "Warrior": "Team/Tank: DMG Reduction → Defense → Defense Bonus → Crit Resistance/Evasion. Solo: Physical ATK → Penetration → Crit Damage.",
-    "Assassin": "Choose Attack-Penetration for high-defense bosses or Attack-Crit for Secret Realm speedfarming. Do not mix the two.",
+    "Priest": "General healing/DPS: Attack + Crit. Near 75% heal crit, prioritize Attack > Hit ≈ Crit > Penetration.",
+    "Warrior": "Team/tank: DMG Reduction → Defense → Defense Bonus → Crit Res/Evasion. Solo: Physical ATK → Penetration → Crit Damage.",
+    "Assassin": "Use Attack + Penetration for high-defense bosses or Attack + Crit for speedfarming; do not split paths.",
     "Archer": "Strength (STR) → Agility (AGI) → Attack Speed (ASPD) → Physical Penetration.",
     "Mage": "Magic ATK → Cooldown Reduction (CDR) → Magic Penetration.",
 }
@@ -41,35 +41,35 @@ CLASS_PROFILES = {
         "base_attribute": "Attack and healing stats",
         "gems": "Attack + Crit, or Hit + Crit",
         "refinement": "Crit > Attack > Hit > Penetration",
-        "notable": "Healing crit estimate targets roughly 75%; enemy Crit Resistance may reduce the result.",
+        "notable": "Heal crit estimate targets ~75%; enemy Crit Resistance can reduce it.",
     },
     "Warrior": {
         "advancements": "Gladiator / Paladin",
         "base_attribute": "Physical ATK",
         "gems": "DMG Red, Defense, and HP for team/tank; physical ATK and Penetration for solo",
         "refinement": "Prioritize flat DMG Reduction for team/tank builds",
-        "notable": "Earth Strike scales at 280% ATK and stuns for 1.5 seconds; Valor Bastion absorbs 30% Max HP.",
+        "notable": "Earth Strike: 280% ATK, 1.5s stun. Valor Bastion absorbs 30% Max HP.",
     },
     "Assassin": {
         "advancements": "Night Walker / Ash Envoy",
         "base_attribute": "Physical ATK",
         "gems": "Physical ATK + Penetration, or Physical ATK + Crit Damage",
         "refinement": "Commit to one path; do not split Attack-Penetration and Attack-Crit",
-        "notable": "Shadow Blade scales at 480% ATK and doubles below 30% target HP; Ambush unlocks at level 40.",
+        "notable": "Shadow Blade: 480% ATK, doubles below 30% target HP. Ambush unlocks at level 40.",
     },
     "Archer": {
         "advancements": "Tide Chaser / Wind Walker",
         "base_attribute": "Physical ATK",
         "gems": "Physical ATK, Attack Speed, and Penetration",
         "refinement": "Roll into Attack Speed pools to support projectile loops",
-        "notable": "Piercing Arrow scales at 350% ATK and reduces armor by 20%; Arrow Rain fires 8 waves at 45% ATK each.",
+        "notable": "Piercing Arrow: 350% ATK, −20% armor. Arrow Rain: 8 waves at 45% ATK.",
     },
     "Mage": {
         "advancements": "Advancement names not confirmed",
         "base_attribute": "Magic ATK",
         "gems": "Magic ATK, CDR, and Magic Penetration",
         "refinement": "Prioritize Cooldown Reduction for reliable spell loops",
-        "notable": "Astral Comet scales at 420% Magic ATK and applies a 5-second burn; Arcane Overload adds 8% per stack up to 4 stacks.",
+        "notable": "Astral Comet: 420% Magic ATK, 5s burn. Arcane Overload: +8% per stack, up to 4.",
     },
 }
 

@@ -1,6 +1,7 @@
 :root {
   color-scheme: dark;
   --ink: #edf4ef;
+  --text: #edf4ef;
   --muted: #a8b8ad;
   --paper: #101010;
   --card: #1b1b1b;
@@ -35,6 +36,18 @@ body {
   font-size: 14px;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .page-shell {
   width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
@@ -54,12 +67,15 @@ body {
 
 .visualization-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  justify-items: center;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 12px;
 }
 
+.visualization-layout > .results,
 .visualization-summary {
+  width: 100%;
   min-width: 0;
 }
 
@@ -268,7 +284,8 @@ h2 {
   font-size: 10px;
   line-height: 1.15;
   padding: 7px 10px;
-  overflow-wrap: anywhere;
+  min-height: 44px;
+  white-space: nowrap;
   white-space: normal;
 }
 
@@ -358,7 +375,7 @@ h2 {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 128px;
+  min-height: 96px;
   width: 100%;
   max-width: 430px;
   margin: 0 auto;
@@ -366,7 +383,7 @@ h2 {
 
 .output-graph-layout .screen-graph {
   flex: 1 1 0;
-  height: 104px;
+  height: 88px;
   margin-top: 0;
   min-width: 0;
 }
@@ -378,6 +395,7 @@ h2 {
   min-width: 0;
   color: #b5b5b5;
   font-size: 10px;
+  text-align: center;
 }
 
 .output-graph-legend span {
@@ -879,14 +897,21 @@ input, select {
   background: #101010;
   color: var(--accent);
   font-family: inherit;
-  min-height: 28px;
+  min-height: 44px;
   padding: 4px 7px;
   box-shadow: inset 0 2px 7px rgba(0, 0, 0, .55), 0 1px 0 rgba(255, 255, 255, .05);
 }
 
-input:focus, select:focus {
-  outline: 2px solid #ffad66;
+input:focus-visible, select:focus-visible {
+  outline: 3px solid #ffbd75;
+  outline-offset: 2px;
   border-color: var(--accent);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #ffbd75;
+  outline-offset: 2px;
 }
 
 input.input-error {
@@ -947,12 +972,13 @@ input.input-error {
 }
 
 button {
+  min-height: 44px;
   min-width: 0;
   margin-top: 5px;
   border: 0;
   border-radius: 4px;
   background: linear-gradient(180deg, #ffb15c, #d86f28);
-  color: #1b130d;
+  color: var(--ink);
   cursor: pointer;
   font: inherit;
   font-family: inherit;
@@ -961,6 +987,7 @@ button {
   line-height: 1.2;
   overflow-wrap: anywhere;
   text-transform: none;
+  text-align: center;
   padding: 7px 12px;
 }
 
@@ -977,7 +1004,8 @@ button:hover {
   width: 100%;
 }
 
-.stats-form .form-actions button[type="submit"] {
+.stats-form .form-actions button[type="submit"],
+#compare #compare-calculate {
   background: linear-gradient(180deg, #ffd08a, #f08a36);
   color: #160f09;
   font-size: 13px;
@@ -988,7 +1016,9 @@ button:hover {
 }
 
 .stats-form .form-actions button[type="submit"]:hover,
-.stats-form .form-actions button[type="submit"]:focus-visible {
+.stats-form .form-actions button[type="submit"]:focus-visible,
+#compare #compare-calculate:hover,
+#compare #compare-calculate:focus-visible {
   background: linear-gradient(180deg, #ffe1ad, #ff9f43);
   color: #100b07;
 }
@@ -1163,7 +1193,7 @@ button:hover {
 
 .chart-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -1326,9 +1356,13 @@ th:last-child, td:last-child {
 
 .guide {
   margin-top: 14px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .reference-section {
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #171717;
@@ -1338,20 +1372,40 @@ th:last-child, td:last-child {
 .comparison-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
+}
+
+.comparison-grid > div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #3f3934;
+  border-radius: 7px;
+  background: #1b1b1b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+
+.comparison-grid > div + div {
+  border-left: 1px solid #3f3934;
 }
 
 .comparison-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 5px 8px;
+  align-items: start;
+  gap: 3px 6px;
+}
+
+.comparison-fields > div {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 24px 44px;
 }
 
 .comparison-fields label {
-  display: grid;
-  gap: 3px;
+  margin-top: 0;
   color: var(--muted);
   font-size: 10px;
+  line-height: 12px;
 }
 
 .comparison-fields input {
@@ -1373,8 +1427,8 @@ th:last-child, td:last-child {
 }
 
 #compare .comparison-results {
-  margin-top: 10px;
-  padding-top: 8px;
+  margin-top: 8px;
+  padding-top: 6px;
 }
 
 #compare .metric-grid {
@@ -1403,9 +1457,9 @@ th:last-child, td:last-child {
 }
 
 .comparison-results {
-  margin-top: 16px;
+  margin-top: 10px;
   border-top: 1px solid var(--line);
-  padding-top: 12px;
+  padding-top: 8px;
 }
 
 .comparison-results h3 {
@@ -1413,9 +1467,9 @@ th:last-child, td:last-child {
 }
 
 .comparison-visualization {
-  margin-top: 14px;
+  margin-top: 10px;
   border-top: 1px solid var(--line);
-  padding-top: 12px;
+  padding-top: 8px;
 }
 
 .comparison-visualization h3 {
@@ -1423,7 +1477,7 @@ th:last-child, td:last-child {
 }
 
 .comparison-change-summary {
-  margin: 0 0 9px;
+  margin: 0 0 6px;
   color: var(--muted);
   font-size: 10px;
 }
@@ -1535,7 +1589,7 @@ code {
 
 .guide-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
 }
 
@@ -1543,38 +1597,63 @@ code {
   grid-template-columns: 1fr;
 }
 
-.guide-grid div {
-  border-right: 1px solid var(--line);
-  padding: 0 18px;
+.class-reference {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #121212;
+  padding: 12px;
+}
+
+.class-reference h3 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.class-reference-summary {
+  margin: 5px 0 12px;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.class-reference dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 14px;
+  margin: 0;
+}
+
+.class-reference dl div {
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
   background: #171717;
 }
 
-.guide-grid div:first-child {
-  padding-left: 0;
-}
-
-.guide-grid div:last-child {
-  border-right: 0;
-  padding-right: 0;
-}
-
-.guide-grid strong, .guide-grid span {
-  display: block;
-}
-
-.guide-grid strong {
-  margin-bottom: 8px;
-  font-size: 12px;
-}
-
-.guide-grid span {
+.class-reference dt {
   color: var(--muted);
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.class-reference dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 10px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .class-reference[hidden] {
-  display: none;
+  display: none !important;
 }
 
 .reference-credit {
@@ -1641,6 +1720,9 @@ code {
     min-width: 58px;
     min-height: 38px;
     padding: 7px 8px;
+    font-size: 9px;
+    letter-spacing: .02em;
+    white-space: nowrap;
   }
 
   .page-action-status {
@@ -1735,6 +1817,59 @@ button:active {
   transform: translateY(3px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (min-width: 761px) {
+  .page-shell {
+    padding-top: 12px;
+    padding-bottom: 62px;
+  }
+
+  .app-page.card {
+    padding: 16px;
+  }
+
+  .stats-form {
+    padding: 16px;
+  }
+
+  .hero {
+    margin-bottom: 16px;
+  }
+
+  .content-grid {
+    gap: 16px;
+  }
+
+  .section-heading {
+    margin-bottom: 10px;
+  }
+
+  .metric {
+    padding: 9px;
+  }
+
+  .chart-card {
+    padding: 10px;
+  }
+
+  .page-actions {
+    margin-top: 12px;
+  }
+}
+
 @media (max-width: 760px) {
   body {
     padding-bottom: 74px;
@@ -1762,6 +1897,7 @@ button:active {
   .screen-tab {
     font-size: 8px;
     letter-spacing: 0;
+    min-height: 44px;
     padding: 7px 3px;
   }
 
@@ -1817,8 +1953,8 @@ button:active {
   }
 
   input, select {
-    min-height: 26px;
-    padding: 3px 6px;
+    min-height: 44px;
+    padding: 6px;
   }
 
   .stats-section {
@@ -1843,8 +1979,16 @@ button:active {
   }
 
   .screen-graph {
-    height: 58px;
+    height: 52px;
     margin-top: 6px;
+  }
+
+  .output-graph-layout {
+    min-height: 82px;
+  }
+
+  .output-graph-layout .screen-graph {
+    height: 70px;
   }
 
   .screen-equation strong {
@@ -1871,15 +2015,9 @@ button:active {
     gap: 17px;
   }
 
-  .guide-grid div, .guide-grid div:first-child, .guide-grid div:last-child {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-    padding: 0 0 17px;
-  }
-
-  .guide-grid div:last-child {
-    border-bottom: 0;
-    padding-bottom: 0;
+  .class-reference dl {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 }
 
@@ -1889,8 +2027,12 @@ button:active {
   }
 
   @media (max-width: 600px) {
-    #compare {
-      padding: 10px;
+      .comparison-grid > div {
+        padding: 8px;
+      }
+
+      #compare {
+        padding: 10px;
     }
 
     #compare .comparison-grid {
@@ -1928,6 +2070,7 @@ button:active {
   }
 
   .screen-tab {
+    min-height: 44px;
     padding: 6px 3px;
     font-size: 10px;
   }
