@@ -552,7 +552,6 @@ h2 {
 }
 
 .class-focus-point {
-  fill: var(--accent);
   stroke: var(--panel);
   stroke-width: 2;
 }
@@ -680,9 +679,17 @@ h2 {
 }
 
 .hps-line {
-  fill: none;
+  overflow: visible;
+}
+
+.hps-line-segment {
   stroke-width: 3;
   stroke-linecap: round;
+}
+
+.hps-line-point {
+  stroke: var(--panel);
+  stroke-width: 2;
 }
 
 .hps-line-raw {

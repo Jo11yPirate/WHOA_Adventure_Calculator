@@ -224,11 +224,18 @@ function updateHpsRateGraph(values) {
   const seconds = [0, 60, 120, 180, 240, 300];
   const xPositions = [40, 132, 224, 316, 408, 500];
   const maximum = Math.max(...values, 1) * 300;
+  const colors = ["#f97316", "#c2410c", "#fed7aa"];
   document.querySelectorAll(".hps-line").forEach((line, index) => {
     const value = values[index] ?? values[0];
-    line.setAttribute("points", seconds.map((second, pointIndex) =>
-      `${xPositions[pointIndex]},${126 - ((value * second) / maximum) * 92}`
-    ).join(" "));
+    const points = seconds.map((second, pointIndex) => ({
+      x: xPositions[pointIndex],
+      y: 126 - ((value * second) / maximum) * 92,
+    }));
+    line.innerHTML = `${points.slice(0, -1).map((point, pointIndex) =>
+      `<line x1="${point.x}" y1="${point.y}" x2="${points[pointIndex + 1].x}" y2="${points[pointIndex + 1].y}" stroke="${colors[index]}" class="hps-line-segment"></line>`
+    ).join("")}${points.map((point) =>
+      `<circle cx="${point.x}" cy="${point.y}" r="3.5" fill="${colors[index]}" class="hps-line-point"></circle>`
+    ).join("")}`;
   });
 }
 
@@ -258,7 +265,7 @@ function updateClassFocus(className, values) {
       values: [0, 2500, 5000, 7500, 10000].map((enemyDefense) =>
         rawOutput / (1 + Math.max(0, enemyDefense - penetration) / 2000)
       ),
-      colors: ["#fed7aa", "#f97316", "#c2410c"],
+      colors: ["#fed7aa", "#f97316", "#ea580c", "#c2410c", "#9a3412"],
     },
     Priest: {
       title: "Five-Minute HPS Projection",
@@ -290,11 +297,15 @@ function updateClassFocus(className, values) {
       const xPositions = config.values.map((_, index) =>
         40 + (index * 290) / Math.max(config.values.length - 1, 1)
       );
-      const points = config.values.map((value, index) =>
-        `${xPositions[index]},${140 - (value / maximum) * 115}`
-      ).join(" ");
-      chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path><polyline points="${points}" class="class-focus-line"></polyline>${config.values.map((value, index) =>
-        `<circle cx="${xPositions[index]}" cy="${140 - (value / maximum) * 115}" r="4" class="class-focus-point"></circle><text x="${xPositions[index]}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`
+      const points = config.values.map((value, index) => ({
+        x: xPositions[index],
+        y: 140 - (value / maximum) * 115,
+      }));
+      const segments = points.slice(0, -1).map((point, index) =>
+        `<line x1="${point.x}" y1="${point.y}" x2="${points[index + 1].x}" y2="${points[index + 1].y}" stroke="${config.colors[index]}" class="class-focus-line"></line>`
+      ).join("");
+      chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${segments}${points.map((point, index) =>
+        `<circle cx="${point.x}" cy="${point.y}" r="4" fill="${config.colors[index]}" class="class-focus-point"></circle><text x="${point.x}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`
       ).join("")}`;
     } else {
       chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${config.values.map((value, index) => {
