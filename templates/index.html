@@ -13,7 +13,7 @@
       <section class="hero">
         <p class="eyebrow">WHOA ADVENTURE - STAT CALCULATOR</p>
         <h1 class="visually-hidden">Whoa Adventure Stat Calculator</h1>
-        <p class="notice"><strong>User-Driven Stat Analysis:</strong> Enter your in-game stats to compare outputs and understand how each value affects your build.</p>
+        <p class="notice"><strong>User-Driven Stat Analysis:</strong> Enter all of your in-game stats for accurate analysis, then compare outputs and understand how each value affects your build.</p>
       </section>
       <section class="content-grid">
         <form id="calculator" class="card stats-form" method="post">
@@ -313,7 +313,8 @@
       </section>
 
       <section id="compare" class="app-page card guide" data-app-page="compare" hidden aria-hidden="true">
-        <div class="section-heading"><div><p class="eyebrow">Equipment Comparison</p><h2>Compare Current And New Stats</h2></div></div>
+        <div class="section-heading"><div><p class="eyebrow">Equipment Comparison</p><div class="compare-title-row"><h2>Compare Current And New Stats</h2><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="compare-help">?</button></div></div></div>
+        <div id="compare-help" class="viz-help compare-help" hidden><strong>How to Compare Gear:</strong> Enter your currently equipped stats on the left. Enter the stats for the gear you are considering on the right. Select Calculate Stats to compare the two sets and see the projected gains and losses; leave an equipment field blank to keep that current stat unchanged.</div>
         <div class="comparison-grid">
           <div>
             <h3>Current Stats</h3>

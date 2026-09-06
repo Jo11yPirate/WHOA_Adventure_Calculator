@@ -623,7 +623,7 @@ document.querySelectorAll(".screen-tab").forEach((tab) => {
 
 document.querySelectorAll(".viz-help-button").forEach((button) => {
   button.addEventListener("click", () => {
-    const panel = button.closest(".screen-panel");
+    const panel = button.closest(".screen-panel, .app-page");
     const help = panel?.querySelector(`#${button.getAttribute("aria-controls")}`);
     if (!panel || !help) return;
     const isOpen = button.getAttribute("aria-expanded") === "true";

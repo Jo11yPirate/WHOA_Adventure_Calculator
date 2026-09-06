@@ -913,6 +913,20 @@ h2 {
   color: var(--accent);
 }
 
+.compare-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compare-title-row h2 {
+  margin-bottom: 0;
+}
+
+.compare-help {
+  margin: -2px 0 10px;
+}
+
 .viz-help {
   max-width: 520px;
   margin: 5px auto 2px;
