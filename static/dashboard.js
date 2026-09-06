@@ -621,6 +621,33 @@ document.querySelectorAll(".screen-tab").forEach((tab) => {
   });
 });
 
+document.querySelectorAll(".viz-help-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const panel = button.closest(".screen-panel");
+    const help = panel?.querySelector(`#${button.getAttribute("aria-controls")}`);
+    if (!panel || !help) return;
+    const isOpen = button.getAttribute("aria-expanded") === "true";
+    panel.querySelectorAll(".viz-help-button").forEach((otherButton) => {
+      otherButton.setAttribute("aria-expanded", "false");
+    });
+    panel.querySelectorAll(".viz-help").forEach((otherHelp) => {
+      otherHelp.hidden = true;
+    });
+    button.setAttribute("aria-expanded", String(!isOpen));
+    help.hidden = isOpen;
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  document.querySelectorAll(".viz-help-button[aria-expanded=\"true\"]").forEach((button) => {
+    button.setAttribute("aria-expanded", "false");
+    const help = document.getElementById(button.getAttribute("aria-controls"));
+    if (help) help.hidden = true;
+    button.focus();
+  });
+});
+
 const appPages = document.querySelectorAll("[data-app-page]");
 const pageLinks = document.querySelectorAll("[data-page-target]");
 function showAppPage(pageName) {

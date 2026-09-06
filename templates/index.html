@@ -13,7 +13,7 @@
       <section class="hero">
         <p class="eyebrow">WHOA ADVENTURE - STAT CALCULATOR</p>
         <h1 class="visually-hidden">Whoa Adventure Stat Calculator</h1>
-        <p class="notice"><strong>User-Driven Stat Analysis:</strong> Enter your in-game stats to compare outputs and understand how each value affects your build. This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
+        <p class="notice"><strong>User-Driven Stat Analysis:</strong> Enter your in-game stats to compare outputs and understand how each value affects your build.</p>
       </section>
       <section class="content-grid">
         <form id="calculator" class="card stats-form" method="post">
@@ -83,6 +83,7 @@
         <button type="button" data-page-action="share">Share</button>
         <span class="page-action-status" aria-live="polite"></span>
       </div>
+      <p class="app-disclaimer">This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
       </section>
 
       <section id="visualization" class="app-page card calculator-window visualization-page" data-app-page="visualization" aria-labelledby="visualization-heading" hidden aria-hidden="true">
@@ -103,12 +104,15 @@
                 <button type="button" class="screen-tab class-focus-only" id="tab-focus" role="tab" aria-selected="false" aria-controls="panel-focus" data-screen-tab="focus">Focus</button>
               </div>
               <div id="panel-focus" class="screen-panel class-focus-panel" data-screen-panel="focus" role="tabpanel" aria-labelledby="tab-focus" tabindex="0" hidden>
-                <strong id="class-focus-title" class="graph-title">Class Focus</strong>
+                <div class="graph-title-row"><strong id="class-focus-title" class="graph-title">Class Focus</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="focus-help">?</button></div>
+                <div id="focus-help" class="viz-help" hidden>Compare the class-specific values shown in the chart. The legend identifies each point, bar, or line segment, and larger values indicate a stronger result for that metric.</div>
                 <svg id="class-focus-chart" class="class-focus-chart" viewBox="0 0 360 170" role="img" aria-label="Class-specific focus chart"></svg>
                 <div id="class-focus-legend" class="class-focus-legend"></div>
                 <small id="class-focus-note" class="graph-assumption"></small>
               </div>
               <div id="panel-output" class="screen-panel is-active" data-screen-panel="output" role="tabpanel" aria-labelledby="tab-output" tabindex="0">
+                <div class="graph-title-row"><strong class="graph-title">Output Comparison</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="output-help">?</button></div>
+                <div id="output-help" class="viz-help" hidden>Compare the normal and critical results. Taller bars represent higher output; use the legend values for the exact amounts and percentages.</div>
                 <div class="output-graph-layout">
                   <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="{% if selected_class == "Priest" %}Normal and critical healing graph{% else %}Normal and critical damage graph{% endif %}">
                     <path d="M40 12V126H500" class="graph-axis"></path>
@@ -122,13 +126,16 @@
                 </div>
               </div>
               <div id="panel-profile" class="screen-panel" data-screen-panel="profile" role="tabpanel" aria-labelledby="tab-profile" tabindex="0" hidden>
+                <div class="graph-title-row"><strong class="graph-title">Stat Breakdown</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="profile-help">?</button></div>
+                <div id="profile-help" class="viz-help" hidden>See how the displayed stats contribute to the profile. Each color in the chart matches its legend entry and percentage.</div>
                 <div class="breakdown-pie-layout">
                   <div id="breakdown-pie" class="breakdown-pie" role="img" aria-label="Class stat composition pie chart"></div>
                   <div id="breakdown-pie-legend" class="breakdown-pie-legend"></div>
                 </div>
               </div>
               <div id="panel-survivability" class="screen-panel" data-screen-panel="survivability" role="tabpanel" aria-labelledby="tab-survivability" tabindex="0" hidden>
-                <strong class="graph-title">Normalized Survivability Profile</strong>
+                <div class="graph-title-row"><strong class="graph-title">Normalized Survivability Profile</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="survivability-help">?</button></div>
+                <div id="survivability-help" class="viz-help" hidden>Compare the relative shape of the survivability profile on a shared 0–100 scale. The values beside the chart retain their original units.</div>
                 <div class="survivability-profile-layout">
                 <svg class="survivability-profile" viewBox="0 0 350 180" role="img" aria-label="Normalized Warrior survivability profile line graph">
                   <path d="M35 20V145H315" class="graph-axis"></path>
@@ -143,8 +150,8 @@
                 <small class="graph-assumption">The line shows the relative profile shape; values retain their original units.</small>
               </div>
               <div id="panel-rate" class="screen-panel" data-screen-panel="rate" role="tabpanel" aria-labelledby="tab-rate" tabindex="0" hidden>
-                <strong class="graph-title dps-radar-title">DPS Combat Profile</strong>
-                <strong class="graph-title hps-lines-title">HPS Output Profile</strong>
+                <div class="graph-title-row rate-title-row"><strong class="graph-title dps-radar-title">DPS Combat Profile</strong><strong class="graph-title hps-lines-title">HPS Output Profile</strong><button type="button" class="viz-help-button viz-help-button-rate" aria-expanded="false" aria-controls="rate-help">?</button></div>
+                <div id="rate-help" class="viz-help" hidden>Read the active chart using its legend. The radar compares combat metrics by their chart scales; the HPS lines show cumulative healing over time, with the final point representing five minutes.</div>
                 <svg class="hps-line-chart" viewBox="0 0 520 150" role="img" aria-label="HPS output profile line graph">
                   <path d="M40 12V126H500" class="graph-axis"></path><path d="M40 42H500M40 84H500" class="graph-grid"></path>
                   <g class="hps-line hps-line-raw"></g><g class="hps-line hps-line-normal"></g><g class="hps-line hps-line-critical"></g>
@@ -195,12 +202,15 @@
                 <button type="button" class="screen-tab class-focus-only" id="tab-focus" role="tab" aria-selected="false" aria-controls="panel-focus" data-screen-tab="focus">Focus</button>
               </div>
               <div id="panel-focus" class="screen-panel class-focus-panel" data-screen-panel="focus" role="tabpanel" aria-labelledby="tab-focus" tabindex="0" hidden>
-                <strong id="class-focus-title" class="graph-title">Class Focus</strong>
+                <div class="graph-title-row"><strong id="class-focus-title" class="graph-title">Class Focus</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="focus-help">?</button></div>
+                <div id="focus-help" class="viz-help" hidden>Compare the class-specific values shown in the chart. The legend identifies each point, bar, or line segment, and larger values indicate a stronger result for that metric.</div>
                 <svg id="class-focus-chart" class="class-focus-chart" viewBox="0 0 360 170" role="img" aria-label="Class-specific focus chart"></svg>
                 <div id="class-focus-legend" class="class-focus-legend"></div>
                 <small id="class-focus-note" class="graph-assumption"></small>
               </div>
               <div id="panel-output" class="screen-panel is-active" data-screen-panel="output" role="tabpanel" aria-labelledby="tab-output" tabindex="0">
+                <div class="graph-title-row"><strong class="graph-title">Output Comparison</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="output-help">?</button></div>
+                <div id="output-help" class="viz-help" hidden>Compare the normal and critical results. Taller bars represent higher output; use the legend values for the exact amounts and percentages.</div>
                 <div class="output-graph-layout">
                   <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical damage graph">
                     <path d="M40 12V126H500" class="graph-axis"></path>
@@ -214,21 +224,24 @@
                 </div>
               </div>
               <div id="panel-profile" class="screen-panel" data-screen-panel="profile" role="tabpanel" aria-labelledby="tab-profile" tabindex="0" hidden>
+                <div class="graph-title-row"><strong class="graph-title">Stat Breakdown</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="profile-help">?</button></div>
+                <div id="profile-help" class="viz-help" hidden>See how the displayed stats contribute to the profile. Each color in the chart matches its legend entry and percentage.</div>
                 <div class="breakdown-pie-layout">
                   <div id="breakdown-pie" class="breakdown-pie" role="img" aria-label="Class stat composition pie chart"></div>
                   <div id="breakdown-pie-legend" class="breakdown-pie-legend"></div>
                 </div>
               </div>
               <div id="panel-survivability" class="screen-panel" data-screen-panel="survivability" role="tabpanel" aria-labelledby="tab-survivability" tabindex="0" hidden>
-                <strong class="graph-title">Normalized Survivability Profile</strong>
+                <div class="graph-title-row"><strong class="graph-title">Normalized Survivability Profile</strong><button type="button" class="viz-help-button" aria-expanded="false" aria-controls="survivability-help">?</button></div>
+                <div id="survivability-help" class="viz-help" hidden>Compare the relative shape of the survivability profile on a shared 0–100 scale. The values beside the chart retain their original units.</div>
                 <div class="survivability-profile-layout"><svg class="survivability-profile" viewBox="0 0 350 180" role="img" aria-label="Normalized Warrior survivability profile line graph">
                   <path d="M35 20V145H315" class="graph-axis"></path><path d="M35 51H315M35 82H315M35 113H315" class="graph-grid"></path><g id="survival-profile-lines"></g><g id="survival-profile-points"></g>
                   <text x="28" y="148" text-anchor="end" class="graph-label">0</text><text x="28" y="85" text-anchor="end" class="graph-label">50</text><text x="28" y="23" text-anchor="end" class="graph-label">100</text><text x="35" y="162" text-anchor="middle" class="graph-label">Raw HP</text><text x="105" y="162" text-anchor="middle" class="graph-label">Effective HP</text><text x="175" y="162" text-anchor="middle" class="graph-label">Hits</text><text x="245" y="162" text-anchor="middle" class="graph-label">Dodge</text><text x="315" y="162" text-anchor="middle" class="graph-label">Defense</text>
                 </svg><div id="survival-profile-values" class="survival-profile-values"></div></div><small class="graph-assumption">The line shows the relative profile shape; values retain their original units.</small>
               </div>
               <div id="panel-rate" class="screen-panel" data-screen-panel="rate" role="tabpanel" aria-labelledby="tab-rate" tabindex="0" hidden>
-                <strong class="graph-title dps-radar-title">DPS Combat Profile</strong>
-                <strong class="graph-title hps-lines-title">HPS Output Profile</strong>
+                <div class="graph-title-row rate-title-row"><strong class="graph-title dps-radar-title">DPS Combat Profile</strong><strong class="graph-title hps-lines-title">HPS Output Profile</strong><button type="button" class="viz-help-button viz-help-button-rate" aria-expanded="false" aria-controls="rate-help">?</button></div>
+                <div id="rate-help" class="viz-help" hidden>Read the active chart using its legend. The radar compares combat metrics by their chart scales; the HPS lines show cumulative healing over time, with the final point representing five minutes.</div>
                 <svg class="hps-line-chart" viewBox="0 0 520 150" role="img" aria-label="HPS output profile line graph">
                   <path d="M40 12V126H500" class="graph-axis"></path><path d="M40 42H500M40 84H500" class="graph-grid"></path>
                   <g class="hps-line hps-line-raw"></g><g class="hps-line hps-line-normal"></g><g class="hps-line hps-line-critical"></g>
@@ -296,6 +309,7 @@
           <button type="button" data-page-action="share">Share</button>
           <span class="page-action-status" aria-live="polite"></span>
         </div>
+        <p class="app-disclaimer">This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
       </section>
 
       <section id="compare" class="app-page card guide" data-app-page="compare" hidden aria-hidden="true">
@@ -337,6 +351,7 @@
           <button type="button" data-page-action="share">Share</button>
           <span class="page-action-status" aria-live="polite"></span>
         </div>
+        <p class="app-disclaimer">This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
       </section>
 
       <section id="reference" class="app-page card guide" data-app-page="reference" hidden aria-hidden="true">
@@ -384,6 +399,7 @@
           <button type="button" data-page-action="share">Share</button>
           <span class="page-action-status" aria-live="polite"></span>
         </div>
+        <p class="app-disclaimer">This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
       </section>
     </main>
     <nav class="quick-nav" aria-label="Quick navigation">
