@@ -689,7 +689,7 @@ document.querySelectorAll("[data-page-actions]").forEach((actions) => {
     const button = event.target.closest("[data-page-action]");
     if (!button) return;
     const action = button.dataset.pageAction;
-    if (action === "save") {
+    if (action === "print-save") {
       const page = actions.closest("[data-app-page]");
       if (page?.id === "visualization" || page?.id === "compare") {
         const calculatorForm = document.querySelector(".stats-form");
@@ -698,8 +698,6 @@ document.querySelectorAll("[data-page-actions]").forEach((actions) => {
         saveComparisonState();
         printCurrentPage(actions);
       }
-    } else if (action === "print") {
-      printCurrentPage(actions);
     } else if (action === "share") {
       try {
         await shareCurrentPage(actions);
