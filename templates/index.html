@@ -81,7 +81,8 @@
           </div>
         </form>
       </section>
-      <div class="page-actions page-actions--single" data-page-actions>
+      <div class="page-actions page-actions--two" data-page-actions>
+        <button type="button" data-page-action="print-save">Print or Save PDF</button>
         <button type="button" data-page-action="share">Share</button>
         <span class="page-action-status" aria-live="polite"></span>
       </div>
@@ -355,7 +356,7 @@
         <p class="app-disclaimer">This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
       </section>
 
-      <section id="reference" class="app-page card guide" data-app-page="reference" hidden aria-hidden="true">
+      <section id="class-reference" class="app-page card guide" data-app-page="class-reference" hidden aria-hidden="true">
         <div class="reference-section">
           <div class="section-heading"><div><p class="eyebrow">Class Reference</p></div></div>
           <div class="guide-grid">
@@ -369,12 +370,21 @@
                   <div><dt>Gems</dt><dd>{{ profile.gems }}</dd></div>
                   <div><dt>Refinement</dt><dd>{{ profile.refinement }}</dd></div>
                   <div><dt>Class focus</dt><dd>{{ profile.notable }}</dd></div>
-                  <div><dt>Estimate</dt><dd>{{ class_dashboard[class_name].formula }}</dd></div>
+                  {% if class_name == "Warrior" %}<div><dt>Warrior Optimization Priorities*</dt><dd>{{ profile.optimization }}</dd></div>{% endif %}
                 </dl>
               </article>
             {% endfor %}
           </div>
         </div>
+        <div class="page-actions page-actions--two" data-page-actions>
+          <button type="button" data-page-action="print-save">Print or Save PDF</button>
+          <button type="button" data-page-action="share">Share</button>
+          <span class="page-action-status" aria-live="polite"></span>
+        </div>
+        <p class="app-disclaimer">This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
+      </section>
+
+      <section id="formula-guide" class="app-page card guide" data-app-page="formula-guide" hidden aria-hidden="true">
         <div class="reference-section formula-guide">
           <div class="section-heading"><div><p class="eyebrow">Formula Guide</p></div></div>
           <div class="formula-list">
@@ -392,11 +402,14 @@
           </div>
         </div>
         <div class="reference-credit">
-          <p>Combat models provided and tested by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.<br>Special thanks to Spade, my friends, and my family for their support and advice.</p>
+          <p>Combat models provided and tested by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.</p>
+          <p>*Additional formula refinement and theorycraft / strategy provided by LolitalLynn.</p>
+          <p>Special thanks to Spade, my friends, and my family for their support and advice.</p>
           <p class="creator-credit">Created by <a href="https://github.com/Jo11yPirate/WHOA_Adventure_Calculator" target="_blank" rel="noopener noreferrer">Jo11yPirate</a> with use of agentic AI</p>
           <p class="license-credit">Code is available for use under the <a href="https://github.com/Jo11yPirate/WHOA_Adventure_Calculator/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.</p>
         </div>
-        <div class="page-actions page-actions--single" data-page-actions>
+        <div class="page-actions page-actions--two" data-page-actions>
+          <button type="button" data-page-action="print-save">Print or Save PDF</button>
           <button type="button" data-page-action="share">Share</button>
           <span class="page-action-status" aria-live="polite"></span>
         </div>
@@ -407,7 +420,8 @@
       <a href="#calculator-page" data-page-target="calculator" aria-current="page"><span aria-hidden="true">▣</span><span>Base Stats</span></a>
       <a href="#visualization" data-page-target="visualization"><span aria-hidden="true">▥</span><span>Visualization</span></a>
       <a href="#compare" data-page-target="compare"><span aria-hidden="true">⇄</span><span>Compare Gear</span></a>
-      <a href="#reference" data-page-target="reference"><span aria-hidden="true">?</span><span>Reference</span></a>
+      <a href="#class-reference" data-page-target="class-reference"><span aria-hidden="true">?</span><span>Class Reference</span></a>
+      <a href="#formula-guide" data-page-target="formula-guide"><span aria-hidden="true">≡</span><span>Formula Guide</span></a>
     </nav>
   </body>
 </html>

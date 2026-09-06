@@ -1942,7 +1942,7 @@ code {
   bottom: 0;
   left: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   justify-content: center;
   gap: 8px;
   padding: 8px max(12px, calc((100vw - 860px) / 2)) 0;
@@ -1966,6 +1966,7 @@ code {
   font-family: inherit;
   font-size: 10px;
   letter-spacing: .05em;
+  text-align: center;
   text-decoration: none;
   text-transform: none;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 -3px 0 #0b0a09, 0 6px 14px rgba(0, 0, 0, .28);
@@ -2200,7 +2201,7 @@ button:active {
   }
 
   .quick-nav {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 4px;
     padding: 6px 6px 0;
   }

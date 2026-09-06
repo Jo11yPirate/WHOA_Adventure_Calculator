@@ -721,7 +721,7 @@ document.querySelectorAll("[data-page-actions]").forEach((actions) => {
     const action = button.dataset.pageAction;
     if (action === "print-save") {
       const page = actions.closest("[data-app-page]");
-      if (page?.id === "visualization" || page?.id === "compare") {
+      if (page?.id === "calculator" || page?.id === "visualization" || page?.id === "compare" || page?.id === "class-reference" || page?.id === "formula-guide") {
         const calculatorForm = document.querySelector(".stats-form");
         const classSelect = document.getElementById("class-select");
         if (calculatorForm && classSelect) saveCalculatorState(calculatorForm, classSelect);
@@ -752,7 +752,7 @@ pageLinks.forEach((link) => {
 function pageNameFromHash() {
   const hash = window.location.hash.slice(1);
   if (hash === "calculator-page") return "calculator";
-  return ["compare", "visualization", "reference"].includes(hash) ? hash : "calculator";
+  return ["compare", "visualization", "class-reference", "formula-guide"].includes(hash) ? hash : "calculator";
 }
 
 function syncPageFromHash() {

@@ -49,6 +49,7 @@ CLASS_PROFILES = {
         "gems": "DMG Red, Defense, and HP for team/tank; physical ATK and Penetration for solo",
         "refinement": "Prioritize flat DMG Reduction for team/tank builds",
         "notable": "Team/tank resilience and reliable physical damage.",
+        "optimization": "Warrior Optimization Priorities: Stop near 79% Damage Reduction; target roughly 3,800–4,200 Hit Rating; prioritize Attack + Penetration over HP%, then Defense%. Avoid Evasion% on HP/Defense builds because low Attack can reduce shield and lifesteal scaling.",
     },
     "Assassin": {
         "advancements": "Night Walker / Ash Envoy",
