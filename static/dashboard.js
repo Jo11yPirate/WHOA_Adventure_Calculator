@@ -129,15 +129,15 @@ function setBar(id, value, maximum) {
   if (bar) bar.style.width = `${maximum ? Math.min(100, (value / maximum) * 100) : 0}%`;
 }
 
-function updateBreakdownPie(className, attack, penetration, hit, hp, defense, evasion, damageReduction) {
+function updateBreakdownPie(className, attack, penetration, hit, hp, defense, evasion, damageReduction, crit) {
   const isWarrior = className === "Warrior";
   const entries = isWarrior
     ? [["Defense", defense], ["Evasion", evasion], ["Reduction", damageReduction]]
     : className === "Priest"
-      ? [["Attack", attack], ["Penetration", penetration], ["Hit", hit]]
+      ? [["Attack", attack], ["Penetration", penetration], ["Hit", hit], ["Crit", crit]]
       : [["Attack", attack], ["Penetration", penetration]];
   const total = entries.reduce((sum, [, value]) => sum + value, 0);
-  const colors = ["#fed7aa", "#f97316", "#c2410c"];
+  const colors = ["#fed7aa", "#f97316", "#c2410c", "#9a3412"];
   let offset = 0;
   const stops = entries.map(([label, value], index) => {
     const start = offset;
@@ -232,7 +232,7 @@ function updateHpsRateGraph(values) {
 }
 
 function updateClassFocus(className, values) {
-  const [rawOutput, normalOutput, criticalOutput, penetration, defense, effectiveHp, damageReduction, criticalRate, evasion] = values;
+  const [rawOutput, normalOutput, criticalOutput, penetration, defense, effectiveHp, damageReduction, criticalRate, evasion, hitRating, critRating, attack] = values;
   const configs = {
     Assassin: {
       title: "Crit vs Penetration Focus",
@@ -260,13 +260,20 @@ function updateClassFocus(className, values) {
       colors: ["#fed7aa", "#f97316", "#ea580c", "#c2410c", "#9a3412"],
     },
     Priest: {
-      title: "Five-Minute HPS Projection",
-      note: "Cumulative healing projection at one action per second.",
-      chartType: "line",
-      legendBeside: true,
-      labels: ["60s", "180s", "300s"],
-      values: [normalOutput * 60, normalOutput * 180, normalOutput * 300],
-      colors: ["#c2410c", "#f97316", "#fed7aa"],
+      title: "Healing Stat Composition",
+      note: `Share of Attack, Hit, Penetration, and Crit within your total healing stat pool. Healing Critical Rate (Crit ÷ Base Healing) = ${criticalRate.toFixed(2)}%.`,
+      chartType: "stacked-bar",
+      stacks: [
+        {
+          label: "Healing Stats",
+          segments: [
+            { label: "Attack", value: attack, color: "#c2410c" },
+            { label: "Hit", value: hitRating, color: "#f97316" },
+            { label: "Penetration", value: penetration, color: "#fed7aa" },
+            { label: "Crit", value: critRating, color: "#9a3412" },
+          ],
+        },
+      ],
     },
     Warrior: {
       title: "Defensive Stat Focus",
@@ -277,7 +284,9 @@ function updateClassFocus(className, values) {
     },
   };
   const config = configs[className] || configs.Assassin;
-  const maximum = Math.max(...config.values, 1);
+  const maximum = config.chartType === "stacked-bar"
+    ? Math.max(...config.stacks.map((stack) => stack.segments.reduce((sum, segment) => sum + segment.value, 0)), 1)
+    : Math.max(...config.values, 1);
   document.querySelectorAll(".class-focus-panel").forEach((panel) => {
     const chart = panel.querySelector(".class-focus-chart");
     const legend = panel.querySelector(".class-focus-legend");
@@ -299,6 +308,21 @@ function updateClassFocus(className, values) {
       chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${segments}${points.map((point, index) =>
         `<circle cx="${point.x}" cy="${point.y}" r="4" fill="${config.colors[index]}" class="class-focus-point"></circle><text x="${point.x}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`
       ).join("")}`;
+    } else if (config.chartType === "stacked-bar") {
+      const barWidth = config.stacks.length === 1 ? 120 : 62;
+      const totalWidth = config.stacks.length * barWidth + (config.stacks.length - 1) * 40;
+      const startX = 188 - totalWidth / 2;
+      chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${config.stacks.map((stack, index) => {
+        const x = startX + index * (barWidth + 40);
+        let cumulativeHeight = 0;
+        const bars = stack.segments.map((segment) => {
+          const height = Math.max(segment.value ? 3 : 0, (segment.value / maximum) * 105);
+          const y = 140 - cumulativeHeight - height;
+          cumulativeHeight += height;
+          return `<rect x="${x}" y="${y}" width="${barWidth}" height="${height}" fill="${segment.color}" class="class-focus-bar"></rect>`;
+        }).join("");
+        return `${bars}<text x="${x + barWidth / 2}" y="158" text-anchor="middle" class="graph-label">${stack.label}</text>`;
+      }).join("")}`;
     } else {
       chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${config.values.map((value, index) => {
         const height = Math.max(5, value / maximum * 105);
@@ -306,9 +330,23 @@ function updateClassFocus(className, values) {
         return `<rect x="${x}" y="${140 - height}" width="62" height="${height}" fill="${config.colors[index]}" class="class-focus-bar"></rect><text x="${x + 31}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`;
       }).join("")}`;
     }
-    legend.innerHTML = config.labels.map((label, index) =>
-      `<span><i style="background:${config.colors[index]}"></i><b>${label}</b><em>${format(config.values[index])}</em></span>`
-    ).join("");
+    if (config.chartType === "stacked-bar") {
+      const uniqueSegments = [];
+      config.stacks.forEach((stack) => {
+        stack.segments.forEach((segment) => {
+          if (!uniqueSegments.some((existing) => existing.label === segment.label)) {
+            uniqueSegments.push(segment);
+          }
+        });
+      });
+      legend.innerHTML = uniqueSegments.map((segment) =>
+        `<span><i style="background:${segment.color}"></i><span class="class-focus-legend-text"><b>${segment.label}</b><em>${format(segment.value)}</em></span></span>`
+      ).join("");
+    } else {
+      legend.innerHTML = config.labels.map((label, index) =>
+        `<span><i style="background:${config.colors[index]}"></i><b>${label}</b><em>${format(config.values[index])}</em></span>`
+      ).join("");
+    }
   });
 }
 
@@ -538,7 +576,7 @@ function runRecalculationPipeline() {
     updateHpsRateGraph([rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier]);
     updateClassFocus(
       document.getElementById("class-select").value,
-      [rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, penetrationRating, defense, effectiveHp, damageReduction, criticalRate, evasion],
+      [rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, penetrationRating, defense, effectiveHp, damageReduction, criticalRate, evasion, hitRating, critRating, baseAttribute],
     );
     updateSurvivabilityGraph([
       defense,
@@ -554,6 +592,7 @@ function runRecalculationPipeline() {
       defense,
       evasion,
       damageReduction * 100,
+      critRating,
     );
     setText("screen-normal", format(rawOutput * mitigation));
     setText("screen-critical", format(rawOutput * mitigation * criticalMultiplier));
