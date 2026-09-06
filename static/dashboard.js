@@ -240,14 +240,20 @@ function updateClassFocus(className, values) {
     },
     Mage: {
       title: "Defense Sensitivity",
-      note: "Estimated output at the current defense baseline and without mitigation.",
-      labels: ["Unmitigated", "Current", "Defense"],
-      values: [rawOutput, normalOutput, defense],
+      note: "Estimated output as enemy Defense rises, after applying your Penetration.",
+      chartType: "line",
+      legendBeside: true,
+      labels: ["0", "2.5k", "5k", "7.5k", "10k"],
+      values: [0, 2500, 5000, 7500, 10000].map((enemyDefense) =>
+        rawOutput / (1 + Math.max(0, enemyDefense - penetration) / 2000)
+      ),
       colors: ["#fed7aa", "#f97316", "#c2410c"],
     },
     Priest: {
       title: "Five-Minute HPS Projection",
       note: "Cumulative healing projection at one action per second.",
+      chartType: "line",
+      legendBeside: true,
       labels: ["60s", "180s", "300s"],
       values: [normalOutput * 60, normalOutput * 180, normalOutput * 300],
       colors: ["#c2410c", "#f97316", "#fed7aa"],
@@ -265,13 +271,27 @@ function updateClassFocus(className, values) {
   document.querySelectorAll(".class-focus-panel").forEach((panel) => {
     const chart = panel.querySelector(".class-focus-chart");
     const legend = panel.querySelector(".class-focus-legend");
+    panel.classList.toggle("focus-side-legend", Boolean(config.legendBeside));
+    panel.classList.toggle("priest-focus-side-legend", className === "Priest");
     panel.querySelector("#class-focus-title").textContent = config.title;
     panel.querySelector("#class-focus-note").textContent = config.note;
-    chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${config.values.map((value, index) => {
-      const height = Math.max(5, value / maximum * 105);
-      const x = 58 + index * 105;
-      return `<rect x="${x}" y="${140 - height}" width="62" height="${height}" fill="${config.colors[index]}" class="class-focus-bar"></rect><text x="${x + 31}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`;
-    }).join("")}`;
+    if (config.chartType === "line") {
+      const xPositions = config.values.map((_, index) =>
+        40 + (index * 290) / Math.max(config.values.length - 1, 1)
+      );
+      const points = config.values.map((value, index) =>
+        `${xPositions[index]},${140 - (value / maximum) * 115}`
+      ).join(" ");
+      chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path><polyline points="${points}" class="class-focus-line"></polyline>${config.values.map((value, index) =>
+        `<circle cx="${xPositions[index]}" cy="${140 - (value / maximum) * 115}" r="4" class="class-focus-point"></circle><text x="${xPositions[index]}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`
+      ).join("")}`;
+    } else {
+      chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${config.values.map((value, index) => {
+        const height = Math.max(5, value / maximum * 105);
+        const x = 58 + index * 105;
+        return `<rect x="${x}" y="${140 - height}" width="62" height="${height}" fill="${config.colors[index]}" class="class-focus-bar"></rect><text x="${x + 31}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`;
+      }).join("")}`;
+    }
     legend.innerHTML = config.labels.map((label, index) =>
       `<span><i style="background:${config.colors[index]}"></i><b>${label}</b><em>${format(config.values[index])}</em></span>`
     ).join("");
@@ -280,6 +300,9 @@ function updateClassFocus(className, values) {
 
 function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, penetration, outputBonus, enemyDefense, mitigation, incomingDamage, damageReduction, damageReceived) {
   const isHealing = document.getElementById("class-select")?.value === "Priest";
+  document.querySelectorAll('[data-screen-panel="rate"]').forEach((panel) => {
+    panel.classList.toggle("dps-side-legend", !isHealing);
+  });
   const outputMax = Math.max(rawOutput, criticalOutput, 1);
   setBar("bar-normal", normalOutput, outputMax);
   setBar("bar-critical", criticalOutput, outputMax);

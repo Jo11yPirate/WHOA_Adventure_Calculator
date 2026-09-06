@@ -474,6 +474,43 @@ h2 {
   rx: 2px;
 }
 
+.class-focus-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.class-focus-point {
+  fill: var(--accent);
+  stroke: var(--panel);
+  stroke-width: 2;
+}
+
+.class-focus-panel.focus-side-legend {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 128px;
+  column-gap: 8px;
+  align-items: center;
+}
+
+.class-focus-panel.focus-side-legend .graph-title,
+.class-focus-panel.focus-side-legend .graph-assumption {
+  grid-column: 1 / -1;
+}
+
+.class-focus-panel.focus-side-legend .class-focus-chart {
+  width: 100%;
+}
+
+.class-focus-panel.focus-side-legend .class-focus-legend {
+  display: grid;
+  justify-content: stretch;
+  gap: 7px;
+  margin-top: 0;
+}
+
 .class-focus-legend {
   display: flex;
   justify-content: center;
@@ -504,6 +541,32 @@ h2 {
   color: var(--accent);
   font-style: normal;
   font-weight: 800;
+}
+
+@media (max-width: 520px) {
+  .class-focus-panel.priest-focus-side-legend.focus-side-legend {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px;
+    column-gap: 6px;
+  }
+
+  .class-focus-panel.priest-focus-side-legend.focus-side-legend .class-focus-legend {
+    display: grid;
+    justify-content: stretch;
+    gap: 7px;
+    margin-top: 0;
+  }
+
+  .class-focus-panel.focus-side-legend {
+    display: block;
+  }
+
+  .class-focus-panel.focus-side-legend .class-focus-legend {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 2px;
+  }
 }
 
 .dps-radar[hidden],
@@ -651,6 +714,48 @@ h2 {
   font-size: 10px;
   font-style: normal;
   font-weight: 800;
+}
+
+.screen-panel.dps-side-legend {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 168px;
+  column-gap: 8px;
+  align-items: center;
+}
+
+.screen-panel.dps-side-legend .dps-radar-title,
+.screen-panel.dps-side-legend .graph-assumption {
+  grid-column: 1 / -1;
+}
+
+.screen-panel.dps-side-legend .dps-radar {
+  width: 220px;
+  margin: 5px auto 0;
+}
+
+.screen-panel.dps-side-legend .dps-radar-legend {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  max-width: none;
+  margin: 0;
+}
+
+.screen-panel[hidden].focus-side-legend,
+.screen-panel[hidden].dps-side-legend {
+  display: none !important;
+}
+
+@media (max-width: 520px) {
+  .screen-panel.dps-side-legend {
+    display: block;
+  }
+
+  .screen-panel.dps-side-legend .dps-radar-legend {
+    grid-template-columns: repeat(2, minmax(110px, 1fr));
+    max-width: 290px;
+    margin: 2px auto 0;
+  }
 }
 
 .graph-title {
