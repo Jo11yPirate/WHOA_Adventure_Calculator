@@ -138,6 +138,24 @@ class AscendancyCalculatorTests(unittest.TestCase):
         self.assertEqual(result["heal_crit"], 10.0)
         self.assertEqual(result["normal_center_hit"], 1500.0)
         self.assertEqual(result["critical_rate"], 10.0)
+        self.assertEqual(result["mitigation_multiplier"], 1.0)
+        self.assertEqual(result["normal_rate"], 1500.0)
+        self.assertEqual(result["five_minute_normal"], 450000.0)
+
+    def test_class_skill_estimate_and_rate_metrics(self):
+        result = calculate_ascendancy({
+            "class_name": "Assassin",
+            "attack": 1000.0,
+            "penetration": 200.0,
+            "hit": 0.0,
+            "crit": 0.0,
+            "damage_bonus_percentage": 25.0,
+        })
+
+        self.assertEqual(result["dashboard_skill"], "Shadow Blade")
+        self.assertAlmostEqual(result["skill_estimate"], 2117.6470588)
+        self.assertEqual(result["normal_rate"], result["mitigated_output"])
+        self.assertEqual(result["five_minute_normal"], result["normal_rate"] * 300)
 
 
 if __name__ == "__main__":

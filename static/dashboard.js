@@ -58,6 +58,13 @@ const comparisonStorageKey = "whoa-adventure-comparison-stats";
 const enemyDefenseBaseline = 5000;
 const enemyHitBaseline = 5000;
 const incomingHitBaseline = 5000;
+const classDashboard = {
+  Priest: { skill: "Sanctifying Light", scaling: 2.6, label: "Sanctifying Light estimate", formula: "Base healing × 260% × Damage Bonus; healing ignores Defense" },
+  Warrior: { skill: "Earth Strike", scaling: 2.8, label: "Earth Strike estimate", formula: "(Attack + Penetration) × 280% × Damage Bonus × Defense mitigation" },
+  Assassin: { skill: "Shadow Blade", scaling: 4.8, label: "Shadow Blade estimate", formula: "(Attack + Penetration) × 480% × Damage Bonus × Defense mitigation" },
+  Archer: { skill: "Piercing Arrow", scaling: 3.5, label: "Piercing Arrow estimate", formula: "(Attack + Penetration) × 350% × Damage Bonus × Defense mitigation" },
+  Mage: { skill: "Astral Comet", scaling: 4.2, label: "Astral Comet estimate", formula: "(Attack + Penetration) × 420% × Damage Bonus × Defense mitigation" },
+};
 
 function saveCalculatorState(form, classSelect) {
   const state = {
@@ -214,6 +221,63 @@ function updateHpsRateGraph(values) {
   });
 }
 
+function updateClassFocus(className, values) {
+  const [rawOutput, normalOutput, criticalOutput, penetration, defense, effectiveHp, damageReduction, criticalRate] = values;
+  const configs = {
+    Assassin: {
+      title: "Crit vs Penetration Focus",
+      note: "Comparison of the two recommended Assassin build directions.",
+      labels: ["Normal", "Critical", "Penetration"],
+      values: [normalOutput, criticalOutput, penetration],
+      colors: ["#c2410c", "#fed7aa", "#f97316"],
+    },
+    Archer: {
+      title: "Penetration Impact",
+      note: "Estimated normal output compared with the raw attack core and Penetration.",
+      labels: ["Raw", "Normal", "Penetration"],
+      values: [rawOutput, normalOutput, penetration],
+      colors: ["#c2410c", "#f97316", "#fed7aa"],
+    },
+    Mage: {
+      title: "Defense Sensitivity",
+      note: "Estimated output at the current defense baseline and without mitigation.",
+      labels: ["Unmitigated", "Current", "Defense"],
+      values: [rawOutput, normalOutput, defense],
+      colors: ["#fed7aa", "#f97316", "#c2410c"],
+    },
+    Priest: {
+      title: "Five-Minute HPS Projection",
+      note: "Cumulative healing projection at one action per second.",
+      labels: ["60s", "180s", "300s"],
+      values: [normalOutput * 60, normalOutput * 180, normalOutput * 300],
+      colors: ["#c2410c", "#f97316", "#fed7aa"],
+    },
+    Warrior: {
+      title: "Effective HP Contribution",
+      note: "Relative contribution of HP, Defense, and Damage Reduction to survivability.",
+      labels: ["HP", "Defense", "Reduction"],
+      values: [effectiveHp, defense, damageReduction * 100],
+      colors: ["#c2410c", "#f97316", "#fed7aa"],
+    },
+  };
+  const config = configs[className] || configs.Assassin;
+  const maximum = Math.max(...config.values, 1);
+  document.querySelectorAll(".class-focus-panel").forEach((panel) => {
+    const chart = panel.querySelector(".class-focus-chart");
+    const legend = panel.querySelector(".class-focus-legend");
+    panel.querySelector("#class-focus-title").textContent = config.title;
+    panel.querySelector("#class-focus-note").textContent = config.note;
+    chart.innerHTML = `<path d="M35 12V140H340" class="graph-axis"></path><path d="M35 50H340M35 95H340" class="graph-grid"></path>${config.values.map((value, index) => {
+      const height = Math.max(5, value / maximum * 105);
+      const x = 58 + index * 105;
+      return `<rect x="${x}" y="${140 - height}" width="62" height="${height}" fill="${config.colors[index]}" class="class-focus-bar"></rect><text x="${x + 31}" y="158" text-anchor="middle" class="graph-label">${config.labels[index]}</text>`;
+    }).join("")}`;
+    legend.innerHTML = config.labels.map((label, index) =>
+      `<span><i style="background:${config.colors[index]}"></i><b>${label}</b><em>${format(config.values[index])}</em></span>`
+    ).join("");
+  });
+}
+
 function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, penetration, outputBonus, enemyDefense, mitigation, incomingDamage, damageReduction, damageReceived) {
   const isHealing = document.getElementById("class-select")?.value === "Priest";
   const outputMax = Math.max(rawOutput, criticalOutput, 1);
@@ -269,6 +333,11 @@ function updatePriestOnly(className) {
   document.querySelectorAll(".priest-only").forEach((element) => {
     element.hidden = className !== "Priest";
   });
+  const dashboard = classDashboard[className];
+  setAllText("#res-skill-label", dashboard.label);
+  setAllText("#res-skill-note", dashboard.formula);
+  setAllText("#res-rate-label", className === "Priest" ? "HPS" : "DPS");
+  setAllText("#res-five-minute-label", className === "Priest" ? "5-Minute Healing" : "5-Minute Damage");
   const label = document.getElementById("critical-rate-label");
   const formula = document.getElementById("critical-rate-formula");
   if (label) label.textContent = className === "Priest" ? "Heal Crit" : "Critical Rate";
@@ -284,6 +353,7 @@ function updatePriestOnly(className) {
       element.textContent = className === "Priest" ? "HPS" : "DPS";
     }
   });
+  document.querySelectorAll(".class-focus-only").forEach((element) => { element.hidden = false; });
   const isHealing = className === "Priest";
   setAllText("#res-raw-label", isHealing ? "Raw Healing" : "Raw Damage");
   setAllText("#res-normal-label", isHealing ? "Normal Healing" : "Normal Damage");
@@ -398,6 +468,10 @@ function runRecalculationPipeline() {
     const defenseMultiplier = 1 / (1 + defense / 2000);
     const incomingDamageMultiplier = defenseMultiplier * (1 - damageReduction);
     const effectiveHp = incomingDamageMultiplier ? hp / incomingDamageMultiplier : hp;
+    const dashboard = classDashboard[document.getElementById("class-select").value];
+    const classMitigation = isHealing ? 1 : mitigation;
+    const skillEstimate = coreOutput * dashboard.scaling * (1 + outputBonus) * classMitigation;
+    const normalRate = rawOutput * classMitigation;
 
     setText("res-raw", format(rawOutput));
     setText("res-normal", format(rawOutput * mitigation));
@@ -410,6 +484,12 @@ function runRecalculationPipeline() {
     setText("res-resilience", (effectiveHp / incomingHitBaseline).toFixed(2));
     setText("res-dodge", `${Math.min(100, evasion / enemyHitBaseline * 100).toFixed(2)}%`);
     setText("res-damage-reduction", `${(damageReduction * 100).toFixed(2)}%`);
+    setText("res-skill-estimate", format(skillEstimate));
+    setText("res-rate", format(normalRate));
+    setText("res-five-minute", format(normalRate * 300));
+    setText("res-penetration-effectiveness", `${Math.max(0, (isHealing ? 0 : ((classMitigation / (1 / (1 + enemyDefenseBaseline / 2000))) - 1) * 100)).toFixed(2)}%`);
+    setText("res-damage-bonus-gain", format(coreOutput * outputBonus));
+    setText("res-critical-gain", format(normalRate * (criticalRate / 100)));
     updateDpsRadar([
       rawOutput * mitigation,
       criticalRate,
@@ -418,6 +498,10 @@ function runRecalculationPipeline() {
       hitRating,
     ]);
     updateHpsRateGraph([rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier]);
+    updateClassFocus(
+      document.getElementById("class-select").value,
+      [rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, penetrationRating, enemyDefenseBaseline, effectiveHp, damageReduction, criticalRate],
+    );
     updateSurvivabilityGraph([
       hp,
       effectiveHp,

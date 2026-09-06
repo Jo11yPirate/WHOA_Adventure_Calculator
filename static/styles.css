@@ -462,6 +462,50 @@ h2 {
   margin: 4px auto 0;
 }
 
+.class-focus-chart {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: 170px;
+  margin: 5px auto 0;
+}
+
+.class-focus-bar {
+  rx: 2px;
+}
+
+.class-focus-legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.class-focus-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.class-focus-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+
+.class-focus-legend b {
+  color: var(--text);
+}
+
+.class-focus-legend em {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 800;
+}
+
 .dps-radar[hidden],
 .dps-radar-legend[hidden],
 .hps-line-chart[hidden],

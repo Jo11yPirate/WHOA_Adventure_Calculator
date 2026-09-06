@@ -81,6 +81,11 @@ FORMULA_GUIDANCE = {
     "Critical Rate": "Damage: Crit / (ATK + Penetration); Priest healing: Crit / (ATK + Penetration + Hit)",
     "HPS at 1 action/sec": "Normal healing per action × 1; five-minute total = HPS × 300",
     "DPS at 1 action/sec": "Normal damage per action × 1; five-minute total = DPS × 300",
+    "Penetration Effectiveness": "(Mitigation with Penetration ÷ mitigation without Penetration - 1) × 100; damage estimate only",
+    "Damage Bonus Gain": "Core output × Damage Bonus%; estimated output added before mitigation",
+    "Expected Critical Gain": "Normal output × (Critical Rate ÷ 100); expected critical contribution",
+    "Skill Estimate": "Class primary skill × (Attack + Penetration [+ Hit for Priest]) × (1 + Damage Bonus %), then defense mitigation",
+    "Five-Minute Total": "Normal HPS/DPS × 300 actions; assumes one action per second",
     "Hit Percentage": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
     "Warrior Effective HP": "HP ÷ ((1 ÷ (1 + Defense ÷ 2,000)) × (1 - Damage Reduction))",
     "Warrior HP Contribution": "HP ÷ Effective HP × 100",
@@ -123,6 +128,19 @@ SKILLS = {
 SKILL_EFFECTS = {
     ("Archer", "Arrow Rain"): {"hit_count": 8},
     ("Assassin", "Shadow Blade"): {"execute_threshold": 0.30, "execute_multiplier": 2.0},
+}
+
+CLASS_DASHBOARD = {
+    "Priest": {"skill": "Sanctifying Light", "scaling": 2.60, "label": "Sanctifying Light estimate",
+               "formula": "Base healing × 260% × Damage Bonus; healing ignores Defense"},
+    "Warrior": {"skill": "Earth Strike", "scaling": 2.80, "label": "Earth Strike estimate",
+                "formula": "(Attack + Penetration) × 280% × Damage Bonus × Defense mitigation"},
+    "Assassin": {"skill": "Shadow Blade", "scaling": 4.80, "label": "Shadow Blade estimate",
+                 "formula": "(Attack + Penetration) × 480% × Damage Bonus × Defense mitigation"},
+    "Archer": {"skill": "Piercing Arrow", "scaling": 3.50, "label": "Piercing Arrow estimate",
+               "formula": "(Attack + Penetration) × 350% × Damage Bonus × Defense mitigation"},
+    "Mage": {"skill": "Astral Comet", "scaling": 4.20, "label": "Astral Comet estimate",
+             "formula": "(Attack + Penetration) × 420% × Damage Bonus × Defense mitigation"},
 }
 
 
@@ -223,6 +241,8 @@ def calculate_ascendancy(values):
     critical_center_hit = normal_center_hit * 2
     effective_enemy_defense = max(0, ENEMY_DEFENSE_BASELINE - penetration)
     mitigation_multiplier = 1 / (1 + effective_enemy_defense / 2000)
+    if is_healing:
+        mitigation_multiplier = 1.0
     defense_score = values.get("defense_score", 0)
     damage_reduction = min(90, values.get("damage_reduction_percentage", 0)) / 100
     defense_multiplier = 1 / (1 + defense_score / 2000)
@@ -255,6 +275,23 @@ def calculate_ascendancy(values):
         "damage_received": 0.0,
         "damage_reduction_applied": 0.0,
     }
+    baseline_mitigation = 1 / (1 + ENEMY_DEFENSE_BASELINE / 2000)
+    result.update({
+        "penetration_effectiveness": 0.0 if is_healing else ((mitigation_multiplier / baseline_mitigation) - 1) * 100,
+        "damage_bonus_gain": core_output * (damage_bonus_multiplier - 1),
+        "expected_critical_gain": normal_center_hit * (critical_rate / 100),
+    })
+    dashboard = CLASS_DASHBOARD[values["class_name"]]
+    skill_output = core_output * dashboard["scaling"] * damage_bonus_multiplier
+    result.update({
+        "dashboard_skill": dashboard["skill"],
+        "dashboard_skill_scaling": dashboard["scaling"],
+        "skill_estimate": skill_output * mitigation_multiplier,
+        "normal_rate": normal_center_hit * mitigation_multiplier,
+        "critical_rate_output": critical_center_hit * mitigation_multiplier,
+        "five_minute_normal": normal_center_hit * mitigation_multiplier * 300,
+        "five_minute_critical": critical_center_hit * mitigation_multiplier * 300,
+    })
     return result
 
 
@@ -357,6 +394,7 @@ def index():
         formula_guidance=FORMULA_GUIDANCE,
         ascendancy_formulas=ASCENDANCY_FORMULAS,
         class_profiles=CLASS_PROFILES,
+        class_dashboard=CLASS_DASHBOARD,
         skills=SKILLS,
         calculator=calculator,
     )
