@@ -958,6 +958,22 @@ button:hover {
   width: 100%;
 }
 
+.stats-form .form-actions button[type="submit"] {
+  background: linear-gradient(180deg, #ffd08a, #f08a36);
+  color: #160f09;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  padding: 10px 12px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+}
+
+.stats-form .form-actions button[type="submit"]:hover,
+.stats-form .form-actions button[type="submit"]:focus-visible {
+  background: linear-gradient(180deg, #ffe1ad, #ff9f43);
+  color: #100b07;
+}
+
 .secondary-button {
   border: 1px solid #6b6258;
   background: #28231e;
