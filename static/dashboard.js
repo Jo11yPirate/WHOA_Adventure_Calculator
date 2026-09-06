@@ -129,10 +129,10 @@ function setBar(id, value, maximum) {
   if (bar) bar.style.width = `${maximum ? Math.min(100, (value / maximum) * 100) : 0}%`;
 }
 
-function updateBreakdownPie(className, attack, penetration, hit, hp, defense, evasion) {
+function updateBreakdownPie(className, attack, penetration, hit, hp, defense, evasion, damageReduction) {
   const isWarrior = className === "Warrior";
   const entries = isWarrior
-    ? [["HP", hp], ["Defense", defense], ["Evasion", evasion]]
+    ? [["Defense", defense], ["Evasion", evasion], ["Reduction", damageReduction]]
     : className === "Priest"
       ? [["Attack", attack], ["Penetration", penetration], ["Hit", hit]]
       : [["Attack", attack], ["Penetration", penetration]];
@@ -156,9 +156,9 @@ function updateBreakdownPie(className, attack, penetration, hit, hp, defense, ev
 
 function updateSurvivabilityGraph(values) {
   const maximum = Math.max(...values, 1);
-  const xPositions = [35, 105, 175, 245, 315];
+  const xPositions = [55, 175, 295];
   const points = values.map((value, index) => `${xPositions[index]},${145 - (value / maximum) * 125}`);
-  const colors = ["#c2410c", "#ea580c", "#f97316", "#f59e0b", "#fed7aa"];
+  const colors = ["#c2410c", "#f97316", "#fed7aa"];
   document.querySelectorAll("#survival-profile-lines").forEach((group) => {
     group.innerHTML = points.slice(0, -1).map((point, index) =>
       `<line x1="${point.split(",")[0]}" y1="${point.split(",")[1]}" x2="${points[index + 1].split(",")[0]}" y2="${points[index + 1].split(",")[1]}" stroke="${colors[index]}" class="survivability-segment"></line>`
@@ -172,8 +172,8 @@ function updateSurvivabilityGraph(values) {
   });
   document.querySelectorAll("#survival-profile-values").forEach((container) => {
     container.innerHTML = values.map((value, index) => {
-      const label = ["Raw HP", "Effective HP", "Hits", "Dodge", "Defense"][index];
-      const display = index === 3 ? `${value.toFixed(2)}%` : index === 2 ? value.toFixed(2) : format(value);
+      const label = ["Defense", "Reduction", "Dodge"][index];
+      const display = index === 1 || index === 2 ? `${value.toFixed(2)}%` : format(value);
       return `<span><i style="background:${colors[index]}"></i><b>${label}</b> ${display}</span>`;
     }).join("");
   });
@@ -232,7 +232,7 @@ function updateHpsRateGraph(values) {
 }
 
 function updateClassFocus(className, values) {
-  const [rawOutput, normalOutput, criticalOutput, penetration, defense, effectiveHp, damageReduction, criticalRate] = values;
+  const [rawOutput, normalOutput, criticalOutput, penetration, defense, effectiveHp, damageReduction, criticalRate, evasion] = values;
   const configs = {
     Assassin: {
       title: "Crit vs Penetration Focus",
@@ -269,10 +269,10 @@ function updateClassFocus(className, values) {
       colors: ["#c2410c", "#f97316", "#fed7aa"],
     },
     Warrior: {
-      title: "Effective HP Contribution",
-      note: "Relative contribution of HP, Defense, and Damage Reduction to survivability.",
-      labels: ["HP", "Defense", "Reduction"],
-      values: [effectiveHp, defense, damageReduction * 100],
+      title: "Defensive Stat Focus",
+      note: "Comparison of Defense, Damage Reduction, and Evasion (HP excluded).",
+      labels: ["Defense", "Reduction", "Evasion"],
+      values: [defense, damageReduction * 100, evasion],
       colors: ["#c2410c", "#f97316", "#fed7aa"],
     },
   };
@@ -538,14 +538,12 @@ function runRecalculationPipeline() {
     updateHpsRateGraph([rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier]);
     updateClassFocus(
       document.getElementById("class-select").value,
-      [rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, penetrationRating, enemyDefenseBaseline, effectiveHp, damageReduction, criticalRate],
+      [rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, penetrationRating, defense, effectiveHp, damageReduction, criticalRate, evasion],
     );
     updateSurvivabilityGraph([
-      hp,
-      effectiveHp,
-      effectiveHp / incomingHitBaseline,
-      Math.min(100, evasion / enemyHitBaseline * 100),
       defense,
+      damageReduction * 100,
+      Math.min(100, evasion / enemyHitBaseline * 100),
     ]);
     updateBreakdownPie(
       document.getElementById("class-select").value,
@@ -555,6 +553,7 @@ function runRecalculationPipeline() {
       hp,
       defense,
       evasion,
+      damageReduction * 100,
     );
     setText("screen-normal", format(rawOutput * mitigation));
     setText("screen-critical", format(rawOutput * mitigation * criticalMultiplier));
