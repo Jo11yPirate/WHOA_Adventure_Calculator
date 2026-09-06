@@ -75,25 +75,30 @@ CLASS_PROFILES = {
 
 FORMULA_GUIDANCE = {
     "Base Damage": "ATK + Penetration",
-    "Critical Rate": "Crit / (ATK + Penetration)",
-    "Healing Output": "ATK + Penetration + Hit",
-    "Critical Damage/Healing": "Normal Center Hit × 2.00",
-    "Damage Bonus": "1 + Damage Bonus %",
+    "Priest Base Healing": "ATK + Penetration + Hit",
+    "Normal Damage/Healing": "Base output × (1 + Damage Bonus %); Priest healing is not defense-mitigated",
+    "Critical Damage/Healing": "Normal output × 2.00",
+    "Critical Rate": "Damage: Crit / (ATK + Penetration); Priest healing: Crit / (ATK + Penetration + Hit)",
+    "HPS at 1 action/sec": "Normal healing per action × 1; five-minute total = HPS × 300",
+    "DPS at 1 action/sec": "Normal damage per action × 1; five-minute total = DPS × 300",
     "Hit Percentage": "min(100, Hit Rating ÷ assumed enemy Evasion × 100), assuming 100 Evasion",
     "Warrior Effective HP": "HP ÷ ((1 ÷ (1 + Defense ÷ 2,000)) × (1 - Damage Reduction))",
     "Warrior HP Contribution": "HP ÷ Effective HP × 100",
     "Warrior Resilience": "Effective HP ÷ assumed incoming hit",
     "Warrior Dodge": "min(100, Evasion ÷ assumed enemy Hit × 100)",
+    "Normalized Survivability Profile": "Each metric is scaled against the largest displayed metric from 0–100 for shape comparison; displayed values retain their original units",
 }
 
 ASCENDANCY_FORMULAS = {
     "Base Damage Core": "Attack + Penetration",
     "Base Healing": "Attack + Penetration + Hit",
-    "Critical Rate": "Crit / (Attack + Penetration)",
+    "Critical Rate (Damage)": "Crit / (Attack + Penetration)",
     "Healing Critical Rate": "Crit / Base Healing",
     "Damage Bonus Multiplier": "1 + Damage Bonus %",
     "Normal Center Hit": "(Attack + Pen) × Damage Bonus",
     "Critical Center Hit": "Normal Center Hit × 2.00",
+    "Healing HPS": "(Attack + Penetration + Hit) × (1 + Damage Bonus %) at 1 action/sec",
+    "Critical Healing HPS": "Healing HPS × 2.00",
 }
 
 SKILLS = {

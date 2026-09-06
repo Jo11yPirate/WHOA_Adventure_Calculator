@@ -102,13 +102,13 @@
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
                 <div class="output-graph-layout">
-                  <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
+                  <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="{% if selected_class == "Priest" %}Normal and critical healing graph{% else %}Normal and critical damage graph{% endif %}">
                     <path d="M40 12V126H500" class="graph-axis"></path>
                     <path d="M40 42H500M40 84H500" class="graph-grid"></path>
                     <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
                     <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
-                    <text x="137" y="143" class="graph-label">Normal</text>
-                    <text x="315" y="143" class="graph-label">Crit</text>
+                    <text id="graph-normal-label" x="137" y="143" class="graph-label">{% if selected_class == "Priest" %}Heal</text>{% else %}Normal</text>{% endif %}
+                    <text id="graph-critical-label" x="315" y="143" class="graph-label">{% if selected_class == "Priest" %}Crit Heal</text>{% else %}Crit</text>{% endif %}
                   </svg>
                   <div id="output-graph-legend" class="output-graph-legend" aria-label="Output graph legend"></div>
                 </div>
@@ -120,22 +120,22 @@
                 </div>
               </div>
               <div class="screen-panel" data-screen-panel="survivability" role="tabpanel" hidden>
-                <svg class="survivability-graph" viewBox="0 0 520 150" role="img" aria-label="Warrior survivability comparison line graph">
-                  <path d="M40 12V126H500" class="graph-axis"></path>
-                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                  <polyline id="survivability-line" class="survivability-line" points="40,126 190,126 340,126 490,126"></polyline>
-                  <circle id="survivability-point-1" class="survivability-point" cx="40" cy="126" r="4"></circle>
-                  <circle id="survivability-point-2" class="survivability-point" cx="190" cy="126" r="4"></circle>
-                  <circle id="survivability-point-3" class="survivability-point" cx="340" cy="126" r="4"></circle>
-                  <circle id="survivability-point-4" class="survivability-point" cx="490" cy="126" r="4"></circle>
-                  <text x="22" y="143" class="graph-label">HP</text>
-                  <text x="155" y="143" class="graph-label">EHP</text>
-                  <text x="300" y="143" class="graph-label">Resilience</text>
-                  <text x="465" y="143" class="graph-label">Dodge</text>
+                <strong class="graph-title">Normalized Survivability Profile</strong>
+                <div class="survivability-profile-layout">
+                <svg class="survivability-profile" viewBox="0 0 350 180" role="img" aria-label="Normalized Warrior survivability profile line graph">
+                  <path d="M35 20V145H315" class="graph-axis"></path>
+                  <path d="M35 51H315M35 82H315M35 113H315" class="graph-grid"></path>
+                  <g id="survival-profile-lines"></g>
+                  <g id="survival-profile-points"></g>
+                  <text x="28" y="148" text-anchor="end" class="graph-label">0</text><text x="28" y="85" text-anchor="end" class="graph-label">50</text><text x="28" y="23" text-anchor="end" class="graph-label">100</text>
+                  <text x="35" y="162" text-anchor="middle" class="graph-label">Raw HP</text><text x="105" y="162" text-anchor="middle" class="graph-label">Effective HP</text><text x="175" y="162" text-anchor="middle" class="graph-label">Hits</text><text x="245" y="162" text-anchor="middle" class="graph-label">Dodge</text><text x="315" y="162" text-anchor="middle" class="graph-label">Defense</text>
                 </svg>
+                <div id="survival-profile-values" class="survival-profile-values"></div>
+                </div>
+                <small class="graph-assumption">The line shows the relative profile shape; values retain their original units.</small>
               </div>
               <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
-                <strong class="graph-title">5-Minute Cumulative {% if selected_class == "Priest" %}HPS{% else %}DPS{% endif %}</strong>
+                <strong class="graph-title rate-graph-title">5-Minute Cumulative {% if selected_class == "Priest" %}HPS{% else %}DPS{% endif %}</strong>
                 <div class="rate-graph-layout">
                   <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Five-minute cumulative {% if selected_class == "Priest" %}healing{% else %}damage{% endif %} graph">
                     <path d="M40 12V126H500" class="graph-axis"></path>
@@ -160,9 +160,9 @@
               </div>
             </div>
             <div class="metric-grid">
-              <article class="metric"><span>Raw Output</span><strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small>Center hit before defense</small></article>
-              <article class="metric"><span>Normal Output</span><strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">Assumes 5,000 enemy Defense</small></article>
-              <article class="metric"><span>Critical Output</span><strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }} after resistance</small></article>
+              <article class="metric"><span id="res-raw-label">{% if selected_class == "Priest" %}Raw Healing</span>{% else %}Raw Damage</span>{% endif %}<strong id="res-raw">{{ "{:,.0f}".format(stats.raw_output) }}</strong><small id="raw-output-note">{% if selected_class == "Priest" %}Healing before critical multiplier{% else %}Center hit before defense{% endif %}</small></article>
+              <article class="metric"><span id="res-normal-label">{% if selected_class == "Priest" %}Normal Healing</span>{% else %}Normal Damage</span>{% endif %}<strong id="res-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong><small id="log-mitigation">{% if selected_class == "Priest" %}One heal per second{% else %}Assumes 5,000 enemy Defense{% endif %}</small></article>
+              <article class="metric"><span id="res-crit-label">{% if selected_class == "Priest" %}Critical Healing</span>{% else %}Critical Damage</span>{% endif %}<strong id="res-crit">{{ "{:,.0f}".format(stats.critical_output) }}</strong><small id="log-crit-mult">×{{ "%.2f"|format(stats.critical_multiplier) }}{% if selected_class != "Priest" %} after resistance{% endif %}</small></article>
               <article class="metric"><span>{% if selected_class == "Priest" %}Heal Crit{% else %}Critical Rate{% endif %}</span><strong id="res-critical-rate">{{ "%.2f"|format(stats.critical_rate) }}%</strong><small>{% if selected_class == "Priest" %}Crit ÷ (Attack + Penetration + Hit){% else %}Crit ÷ core output{% endif %}</small></article>
               {% if selected_class == "Priest" %}<article class="metric"><span>Heal Power (HPI)</span><strong id="res-heal-power">{{ "{:,.2f}".format(stats.heal_power) }}</strong><small>Attack + Hit + Penetration</small></article>{% endif %}
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">{{ "%.2f"|format(stats.estimated_accuracy) }}%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
@@ -187,13 +187,13 @@
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
                 <div class="output-graph-layout">
-                  <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
+                  <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical damage graph">
                     <path d="M40 12V126H500" class="graph-axis"></path>
                     <path d="M40 42H500M40 84H500" class="graph-grid"></path>
                     <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
                     <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
-                    <text x="137" y="143" class="graph-label">Normal</text>
-                    <text x="315" y="143" class="graph-label">Crit</text>
+                    <text id="graph-normal-label" x="137" y="143" class="graph-label">Normal</text>
+                    <text id="graph-critical-label" x="315" y="143" class="graph-label">Crit</text>
                   </svg>
                   <div id="output-graph-legend" class="output-graph-legend" aria-label="Output graph legend"></div>
                 </div>
@@ -205,22 +205,14 @@
                 </div>
               </div>
               <div class="screen-panel" data-screen-panel="survivability" role="tabpanel" hidden>
-                <svg class="survivability-graph" viewBox="0 0 520 150" role="img" aria-label="Warrior survivability comparison line graph">
-                  <path d="M40 12V126H500" class="graph-axis"></path>
-                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                  <polyline id="survivability-line" class="survivability-line" points="40,126 190,126 340,126 490,126"></polyline>
-                  <circle id="survivability-point-1" class="survivability-point" cx="40" cy="126" r="4"></circle>
-                  <circle id="survivability-point-2" class="survivability-point" cx="190" cy="126" r="4"></circle>
-                  <circle id="survivability-point-3" class="survivability-point" cx="340" cy="126" r="4"></circle>
-                  <circle id="survivability-point-4" class="survivability-point" cx="490" cy="126" r="4"></circle>
-                  <text x="22" y="143" class="graph-label">HP</text>
-                  <text x="155" y="143" class="graph-label">EHP</text>
-                  <text x="300" y="143" class="graph-label">Resilience</text>
-                  <text x="465" y="143" class="graph-label">Dodge</text>
-                </svg>
+                <strong class="graph-title">Normalized Survivability Profile</strong>
+                <div class="survivability-profile-layout"><svg class="survivability-profile" viewBox="0 0 350 180" role="img" aria-label="Normalized Warrior survivability profile line graph">
+                  <path d="M35 20V145H315" class="graph-axis"></path><path d="M35 51H315M35 82H315M35 113H315" class="graph-grid"></path><g id="survival-profile-lines"></g><g id="survival-profile-points"></g>
+                  <text x="28" y="148" text-anchor="end" class="graph-label">0</text><text x="28" y="85" text-anchor="end" class="graph-label">50</text><text x="28" y="23" text-anchor="end" class="graph-label">100</text><text x="35" y="162" text-anchor="middle" class="graph-label">Raw HP</text><text x="105" y="162" text-anchor="middle" class="graph-label">Effective HP</text><text x="175" y="162" text-anchor="middle" class="graph-label">Hits</text><text x="245" y="162" text-anchor="middle" class="graph-label">Dodge</text><text x="315" y="162" text-anchor="middle" class="graph-label">Defense</text>
+                </svg><div id="survival-profile-values" class="survival-profile-values"></div></div><small class="graph-assumption">The line shows the relative profile shape; values retain their original units.</small>
               </div>
               <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
-                <strong class="graph-title">5-Minute Cumulative DPS</strong>
+                <strong class="graph-title rate-graph-title">5-Minute Cumulative DPS</strong>
                 <div class="rate-graph-layout">
                   <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Five-minute cumulative damage graph">
                     <path d="M40 12V126H500" class="graph-axis"></path>
@@ -245,9 +237,9 @@
               </div>
             </div>
             <div class="metric-grid">
-              <article class="metric"><span>Raw Output</span><strong id="res-raw">0</strong><small>Center hit before defense</small></article>
-              <article class="metric"><span>Normal Output</span><strong id="res-normal">0</strong><small id="log-mitigation">Assumes 5,000 enemy Defense</small></article>
-              <article class="metric"><span>Critical Output</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50</small></article>
+              <article class="metric"><span id="res-raw-label">Raw Damage</span><strong id="res-raw">0</strong><small id="raw-output-note">Center hit before defense</small></article>
+              <article class="metric"><span id="res-normal-label">Normal Damage</span><strong id="res-normal">0</strong><small id="log-mitigation">Assumes 5,000 enemy Defense</small></article>
+              <article class="metric"><span id="res-crit-label">Critical Damage</span><strong id="res-crit">0</strong><small id="log-crit-mult">×1.50 after resistance</small></article>
               <article class="metric"><span id="critical-rate-label">Critical Rate</span><strong id="res-critical-rate">0.00%</strong><small id="critical-rate-formula">Crit ÷ core output</small></article>
               <article class="metric priest-only" hidden><span>Heal Power (HPI)</span><strong id="res-heal-power">0.00</strong><small>Attack + Hit + Penetration</small></article>
               <article class="metric"><span>Hit Percentage</span><strong id="res-estimated-accuracy">0.00%</strong><small>AI-generated approximation<br>Assumes 100 enemy Evasion</small></article>
@@ -269,8 +261,8 @@
             <div class="chart-card">
               <h3>Output Comparison</h3>
               <div class="bar-chart" aria-label="Output comparison chart">
-                <div class="bar-row"><span>Normal</span><div class="bar-track"><i id="bar-normal"></i></div><strong id="bar-normal-value">0</strong></div>
-                <div class="bar-row"><span>Critical</span><div class="bar-track"><i id="bar-critical"></i></div><strong id="bar-critical-value">0</strong></div>
+                <div class="bar-row"><span id="bar-normal-label">Normal</span><div class="bar-track"><i id="bar-normal"></i></div><strong id="bar-normal-value">0</strong></div>
+                <div class="bar-row"><span id="bar-critical-label">Critical</span><div class="bar-track"><i id="bar-critical"></i></div><strong id="bar-critical-value">0</strong></div>
               </div>
             </div>
             <div class="chart-card">
@@ -316,6 +308,11 @@
           <h3>Comparison Result</h3>
           <div id="comparison-output" class="metric-grid"><p class="muted">Enter current stats and equipment stats to compare them.</p></div>
         </div>
+        <section class="comparison-visualization" aria-live="polite">
+          <h3>Stat Changes From Equipment</h3>
+          <p id="comparison-change-summary" class="comparison-change-summary">Add equipment stats to see gains and losses.</p>
+          <div id="comparison-change-chart" class="comparison-change-chart"></div>
+        </section>
         <div class="form-actions">
           <button id="compare-calculate" type="button">Calculate Stats <span aria-hidden="true">→</span></button>
           <button id="compare-clear-all" type="button" class="secondary-button">Clear All Stats</button>
