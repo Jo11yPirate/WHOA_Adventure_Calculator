@@ -284,6 +284,47 @@ h2 {
   width: 100%;
 }
 
+.output-graph-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-height: 128px;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.output-graph-layout .screen-graph {
+  flex: 0 1 300px;
+  height: 104px;
+  margin-top: 0;
+  min-width: 0;
+}
+
+.output-graph-legend {
+  display: grid;
+  gap: 7px;
+  min-width: 90px;
+  color: #b5b5b5;
+  font-size: 10px;
+}
+
+.output-graph-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.output-graph-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.output-graph-legend strong {
+  color: var(--accent);
+}
+
 .survivability-graph {
   display: block;
   width: 100%;
@@ -920,8 +961,9 @@ th:last-child, td:last-child {
 .formula-list div {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2px;
-  align-items: center;
+  gap: 0;
+  align-items: start;
+  align-self: start;
   border-bottom: 1px solid var(--line);
   padding: 5px 0;
 }
@@ -951,7 +993,6 @@ code {
 
 .formula-list div {
   grid-template-columns: 1fr;
-  gap: 4px;
 }
 
 .guide-grid div {
@@ -995,6 +1036,21 @@ code {
   font-size: 10px;
   line-height: 1.5;
   padding-top: 12px;
+}
+
+.reference-credit p {
+  margin: 0;
+}
+
+.reference-credit .creator-credit {
+  margin-top: 12px;
+  text-align: right;
+}
+
+.reference-credit .license-credit {
+  margin-top: 3px;
+  font-size: 9px;
+  text-align: right;
 }
 
 .reference-credit a {

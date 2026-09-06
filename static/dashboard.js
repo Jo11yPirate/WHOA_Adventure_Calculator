@@ -104,6 +104,10 @@ function format(value) {
   return Math.round(value).toLocaleString();
 }
 
+function percentOf(value, total) {
+  return total ? `${((value / total) * 100).toFixed(2)}%` : "0.00%";
+}
+
 function setBar(id, value, maximum) {
   const bar = document.getElementById(id);
   if (bar) bar.style.width = `${maximum ? Math.min(100, (value / maximum) * 100) : 0}%`;
@@ -129,7 +133,7 @@ function updateBreakdownPie(className, attack, penetration, hit, hp, defense, ev
   if (pie) pie.style.background = `conic-gradient(${stops.join(", ")})`;
   if (legend) {
     legend.innerHTML = entries.map(([label, value], index) =>
-      `<span><i style="background:${colors[index]}"></i>${label} <strong>${format(value)}</strong></span>`
+      `<span><i style="background:${colors[index]}"></i>${label} <strong>${format(value)} (${total ? ((value / total) * 100).toFixed(2) : "0.00"}%)</strong></span>`
     ).join("");
   }
 }
@@ -166,17 +170,27 @@ function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, 
   const outputMax = Math.max(rawOutput, criticalOutput, 1);
   setBar("bar-normal", normalOutput, outputMax);
   setBar("bar-critical", criticalOutput, outputMax);
-  setText("bar-normal-value", format(normalOutput));
-  setText("bar-critical-value", format(criticalOutput));
+  const outputTotal = normalOutput + criticalOutput;
+  setText("bar-normal-value", `${format(normalOutput)} (${percentOf(normalOutput, outputTotal)})`);
+  setText("bar-critical-value", `${format(criticalOutput)} (${percentOf(criticalOutput, outputTotal)})`);
   const statMax = Math.max(attack, defense, penetration, 1);
   setBar("bar-attack", attack, statMax);
   setBar("bar-defense", defense, statMax);
   setBar("bar-penetration", penetration, statMax);
-  setText("bar-attack-value", format(attack));
-  setText("bar-defense-value", format(defense));
-  setText("bar-penetration-value", format(penetration));
+  const statTotal = attack + defense + penetration;
+  setText("bar-attack-value", `${format(attack)} (${percentOf(attack, statTotal)})`);
+  setText("bar-defense-value", `${format(defense)} (${percentOf(defense, statTotal)})`);
+  setText("bar-penetration-value", `${format(penetration)} (${percentOf(penetration, statTotal)})`);
   setText("screen-normal", format(normalOutput));
   setText("screen-critical", format(criticalOutput));
+  document.querySelectorAll("#output-graph-legend").forEach((legend) => {
+    legend.innerHTML = [
+      ["Normal", normalOutput, "#e97b3f"],
+      ["Crit", criticalOutput, "#ffbd75"]
+    ].map(([label, value, color]) =>
+      `<span><i style="background:${color}"></i>${label} <strong>${format(value)}</strong></span>`
+    ).join("");
+  });
   const graphMax = Math.max(criticalOutput, 1);
   const normalHeight = Math.max(4, (normalOutput / graphMax) * 86);
   const criticalHeight = Math.max(4, (criticalOutput / graphMax) * 86);

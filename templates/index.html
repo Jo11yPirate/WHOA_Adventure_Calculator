@@ -11,8 +11,8 @@
     <main class="page-shell">
       <section id="calculator-page" class="app-page is-page-active" data-app-page="calculator">
       <section class="hero">
-        <p class="eyebrow">Whoa Adventure · universal tools</p>
-        <p class="notice"><strong>User-Driven Stat Analysis:</strong> Enter your in-game stats to compare outputs and understand how each value affects your build.</p>
+        <p class="eyebrow">WHOA ADVENTURE - STAT CALCULATOR</p>
+        <p class="notice"><strong>User-Driven Stat Analysis:</strong> Enter your in-game stats to compare outputs and understand how each value affects your build. This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
       </section>
 
       <section class="content-grid">
@@ -96,16 +96,17 @@
                 <button type="button" class="screen-tab combat-rate-only" role="tab" aria-selected="false" data-screen-tab="rate" {% if selected_class == "Warrior" %}hidden{% endif %}>{% if selected_class == "Priest" %}HPS{% else %}DPS{% endif %}</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
-                <div class="screen-equation">Normal <strong id="screen-normal">{{ "{:,.0f}".format(stats.mitigated_output) }}</strong></div>
-                <div class="screen-equation">Crit&nbsp;&nbsp; <strong id="screen-critical">{{ "{:,.0f}".format(stats.critical_output) }}</strong></div>
-                <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
-                  <path d="M40 12V126H500" class="graph-axis"></path>
-                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                  <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
-                  <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
-                  <text x="137" y="143" class="graph-label">Normal</text>
-                  <text x="315" y="143" class="graph-label">Crit</text>
-                </svg>
+                <div class="output-graph-layout">
+                  <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
+                    <path d="M40 12V126H500" class="graph-axis"></path>
+                    <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                    <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
+                    <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
+                    <text x="137" y="143" class="graph-label">Normal</text>
+                    <text x="315" y="143" class="graph-label">Crit</text>
+                  </svg>
+                  <div id="output-graph-legend" class="output-graph-legend" aria-label="Output graph legend"></div>
+                </div>
               </div>
               <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
                 <div class="breakdown-pie-layout">
@@ -170,16 +171,17 @@
                 <button type="button" class="screen-tab combat-rate-only" role="tab" aria-selected="false" data-screen-tab="rate" hidden>DPS</button>
               </div>
               <div class="screen-panel is-active" data-screen-panel="output" role="tabpanel">
-                <div class="screen-equation">Normal <strong id="screen-normal">0</strong></div>
-                <div class="screen-equation">Crit&nbsp;&nbsp; <strong id="screen-critical">0</strong></div>
-                <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
-                  <path d="M40 12V126H500" class="graph-axis"></path>
-                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                  <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
-                  <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
-                  <text x="137" y="143" class="graph-label">Normal</text>
-                  <text x="315" y="143" class="graph-label">Crit</text>
-                </svg>
+                <div class="output-graph-layout">
+                  <svg class="screen-graph" viewBox="0 0 520 150" role="img" aria-label="Normal and critical output graph">
+                    <path d="M40 12V126H500" class="graph-axis"></path>
+                    <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                    <rect id="graph-normal" x="125" y="100" width="90" height="26" class="graph-bar"></rect>
+                    <rect id="graph-critical" x="305" y="40" width="90" height="86" class="graph-bar graph-bar-hot"></rect>
+                    <text x="137" y="143" class="graph-label">Normal</text>
+                    <text x="315" y="143" class="graph-label">Crit</text>
+                  </svg>
+                  <div id="output-graph-legend" class="output-graph-legend" aria-label="Output graph legend"></div>
+                </div>
               </div>
               <div class="screen-panel" data-screen-panel="profile" role="tabpanel" hidden>
                 <div class="breakdown-pie-layout">
@@ -321,7 +323,11 @@
             {% endfor %}
           </div>
         </div>
-        <p class="reference-credit">Combat models provided by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.<br>Special thanks to Spade &amp; JMS for crucial advice &amp; formula editing.</p>
+        <div class="reference-credit">
+          <p>Combat models provided by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.<br>Special thanks to Spade, JMS, &amp; Devon for crucial advice.</p>
+          <p class="creator-credit">Created by <a href="https://github.com/Jo11yPirate/WHOA_Adventure_Calculator" target="_blank" rel="noopener noreferrer">Jo11yPirate</a> with use of agentic AI</p>
+          <p class="license-credit">Code is available for use under the <a href="https://github.com/Jo11yPirate/WHOA_Adventure_Calculator/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.</p>
+        </div>
       </section>
     </main>
     <nav class="quick-nav" aria-label="Quick navigation">
