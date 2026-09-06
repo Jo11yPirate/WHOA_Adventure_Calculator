@@ -621,16 +621,22 @@ document.querySelectorAll(".screen-tab").forEach((tab) => {
   });
 });
 
-document.querySelectorAll(".viz-help-button").forEach((button) => {
+document.querySelectorAll(".viz-help-button, .field-help-button").forEach((button) => {
   button.addEventListener("click", () => {
-    const panel = button.closest(".screen-panel, .app-page");
+    const panel = button.closest(".screen-panel, .app-page, form");
     const help = panel?.querySelector(`#${button.getAttribute("aria-controls")}`);
     if (!panel || !help) return;
     const isOpen = button.getAttribute("aria-expanded") === "true";
-    panel.querySelectorAll(".viz-help-button").forEach((otherButton) => {
+    const buttonSelector = button.classList.contains("field-help-button")
+      ? ".field-help-button"
+      : ".viz-help-button";
+    const helpSelector = button.classList.contains("field-help-button")
+      ? ".field-help"
+      : ".viz-help";
+    panel.querySelectorAll(buttonSelector).forEach((otherButton) => {
       otherButton.setAttribute("aria-expanded", "false");
     });
-    panel.querySelectorAll(".viz-help").forEach((otherHelp) => {
+    panel.querySelectorAll(helpSelector).forEach((otherHelp) => {
       otherHelp.hidden = true;
     });
     button.setAttribute("aria-expanded", String(!isOpen));
@@ -640,7 +646,7 @@ document.querySelectorAll(".viz-help-button").forEach((button) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
-  document.querySelectorAll(".viz-help-button[aria-expanded=\"true\"]").forEach((button) => {
+  document.querySelectorAll(".viz-help-button[aria-expanded=\"true\"], .field-help-button[aria-expanded=\"true\"]").forEach((button) => {
     button.setAttribute("aria-expanded", "false");
     const help = document.getElementById(button.getAttribute("aria-controls"));
     if (help) help.hidden = true;

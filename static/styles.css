@@ -913,6 +913,52 @@ h2 {
   color: var(--accent);
 }
 
+.field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.field-label-row label {
+  flex: 1;
+}
+
+.field-help-button {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  padding: 0;
+  text-transform: none;
+}
+
+.field-help-button:hover,
+.field-help-button:focus-visible,
+.field-help-button[aria-expanded="true"] {
+  background: transparent;
+  color: var(--accent);
+}
+
+.field-help {
+  display: block;
+  margin: 2px 0 1px;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+.field-help[hidden] {
+  display: none !important;
+}
+
 .compare-title-row {
   display: flex;
   align-items: center;

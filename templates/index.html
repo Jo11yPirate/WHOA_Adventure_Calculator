@@ -44,8 +44,9 @@
                 ("defense_score", "Defense", "Your displayed Defense stat.")
               ] %}
                 <div>
-                  <label for="{{ field }}" title="{{ tip }}">{{ label }}</label>
+                  <div class="field-label-row"><label for="{{ field }}" title="{{ tip }}">{{ label }}</label><button type="button" class="field-help-button" aria-expanded="false" aria-controls="{{ field }}-help">(?)</button></div>
                   <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}">
+                  <small id="{{ field }}-help" class="field-help" hidden>{{ tip }}</small>
                 </div>
               {% endfor %}
             </div>
@@ -66,8 +67,9 @@
                 ("damage_reduction_percentage", "Damage Reduction %", "Percent of incoming damage reduced; capped at 90%.")
               ] %}
                 <div>
-                  <label for="{{ field }}" title="{{ tip }}">{{ label }}</label>
+                  <div class="field-label-row"><label for="{{ field }}" title="{{ tip }}">{{ label }}</label><button type="button" class="field-help-button" aria-expanded="false" aria-controls="{{ field }}-help">(?)</button></div>
                   <input id="{{ field }}" name="{{ field }}" type="number" min="0" step="0.01" value="{{ request.form.get(field, '') }}" title="{{ tip }}">
+                  <small id="{{ field }}-help" class="field-help" hidden>{{ tip }}</small>
                 </div>
               {% endfor %}
             </div>
@@ -319,16 +321,16 @@
           <div>
             <h3>Current Stats</h3>
             <div class="comparison-fields">
-              {% for field, label in [("base_attribute", "Attack"), ("stat_hp", "HP"), ("stat_crit", "Crit"), ("stat_hit", "Hit Rating"), ("stat_penetration", "Penetration"), ("stat_defense_rating", "Defense Rating"), ("stat_evasion", "Evasion"), ("stat_crit_resistance", "Crit Res")] %}
-              <div><label for="current-{{ field }}">{{ label }}</label><input id="current-{{ field }}" class="compare-current" data-stat="{{ field }}" type="number" min="0" step="0.01" placeholder="0" aria-label="Current {{ label }}"></div>
+              {% for field, label, tip in [("base_attribute", "Attack", "Your currently equipped Attack or Magic ATK value."), ("stat_hp", "HP", "Your currently equipped maximum HP."), ("stat_crit", "Crit", "Your currently equipped Crit stat."), ("stat_hit", "Hit Rating", "Your currently equipped Hit or Accuracy stat."), ("stat_penetration", "Penetration", "Your currently equipped flat Penetration stat."), ("stat_defense_rating", "Defense Rating", "Your currently equipped Defense Rating stat."), ("stat_evasion", "Evasion", "Your currently equipped Evasion stat."), ("stat_crit_resistance", "Crit Res", "Your currently equipped critical resistance stat.")] %}
+              <div><div class="field-label-row"><label for="current-{{ field }}" title="{{ tip }}">{{ label }}</label><button type="button" class="field-help-button" aria-expanded="false" aria-controls="current-{{ field }}-help">(?)</button></div><input id="current-{{ field }}" class="compare-current" data-stat="{{ field }}" type="number" min="0" step="0.01" placeholder="0" aria-label="Current {{ label }}" title="{{ tip }}"><small id="current-{{ field }}-help" class="field-help" hidden>{{ tip }}</small></div>
               {% endfor %}
             </div>
           </div>
           <div>
             <h3>Equipment Stats</h3>
             <div class="comparison-fields">
-              {% for field, label in [("base_attribute", "Attack"), ("stat_hp", "HP"), ("stat_crit", "Crit"), ("stat_hit", "Hit Rating"), ("stat_penetration", "Penetration"), ("stat_defense_rating", "Defense Rating"), ("stat_evasion", "Evasion"), ("stat_crit_resistance", "Crit Res")] %}
-              <div><label for="equipment-{{ field }}">{{ label }}</label><input id="equipment-{{ field }}" class="compare-item" data-stat="{{ field }}" type="number" min="0" step="0.01" placeholder="0" aria-label="Equipment {{ label }}"></div>
+              {% for field, label, tip in [("base_attribute", "Attack", "The Attack or Magic ATK value on the gear you are considering."), ("stat_hp", "HP", "The maximum HP provided by the gear you are considering."), ("stat_crit", "Crit", "The Crit stat provided by the gear you are considering."), ("stat_hit", "Hit Rating", "The Hit or Accuracy stat provided by the gear you are considering."), ("stat_penetration", "Penetration", "The flat Penetration stat provided by the gear you are considering."), ("stat_defense_rating", "Defense Rating", "The Defense Rating stat provided by the gear you are considering."), ("stat_evasion", "Evasion", "The Evasion stat provided by the gear you are considering."), ("stat_crit_resistance", "Crit Res", "The critical resistance stat provided by the gear you are considering.")] %}
+              <div><div class="field-label-row"><label for="equipment-{{ field }}" title="{{ tip }}">{{ label }}</label><button type="button" class="field-help-button" aria-expanded="false" aria-controls="equipment-{{ field }}-help">(?)</button></div><input id="equipment-{{ field }}" class="compare-item" data-stat="{{ field }}" type="number" min="0" step="0.01" placeholder="0" aria-label="Equipment {{ label }}" title="{{ tip }}"><small id="equipment-{{ field }}-help" class="field-help" hidden>{{ tip }}</small></div>
               {% endfor %}
             </div>
           </div>
