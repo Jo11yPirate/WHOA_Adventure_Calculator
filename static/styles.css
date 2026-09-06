@@ -455,25 +455,75 @@ h2 {
   color: var(--accent);
 }
 
-.rate-graph {
+.dps-radar {
   display: block;
-  width: 100%;
-  height: 76px;
-  margin-top: 5px;
+  width: 220px;
+  height: 190px;
+  margin: 4px auto 0;
 }
 
-.rate-graph-layout {
+.radar-grid polygon,
+.radar-axes line {
+  fill: none;
+  stroke: #554b43;
+  stroke-width: 1;
+}
+
+.radar-axes line {
+  stroke: #3f3833;
+}
+
+.dps-radar-shape {
+  fill: rgba(255, 189, 117, 0.28);
+  stroke: #ffbd75;
+  stroke-width: 2;
+}
+
+.dps-radar-point {
+  stroke: #211e1b;
+  stroke-width: 2;
+}
+
+.radar-scale {
+  fill: var(--muted);
+  font-size: 7px;
+}
+
+.dps-radar-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 7px 14px;
+  max-width: 290px;
+  margin: 2px auto 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.dps-radar-legend span {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  max-width: 430px;
-  margin: 0 auto;
+  gap: 5px;
 }
 
-.rate-graph-layout .rate-graph {
-  flex: 1 1 auto;
-  min-width: 0;
+.dps-radar-legend i {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .08);
+}
+
+.dps-radar-legend b {
+  color: var(--text);
+  font-size: 10px;
+}
+
+.dps-radar-legend em {
+  margin-left: auto;
+  color: var(--accent);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
 }
 
 .graph-title {
@@ -485,72 +535,12 @@ h2 {
   text-transform: uppercase;
 }
 
-.rate-line {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.rate-line:nth-child(3) {
-  stroke: #e97b3f;
-}
-
-.rate-line:nth-child(4) {
-  stroke: #ff9f43;
-}
-
-.rate-line:nth-child(5) {
-  stroke: #ffbd75;
-}
-
-.rate-point {
-  fill: var(--accent);
-  stroke: #211e1b;
-  stroke-width: 2;
-}
-
 .graph-assumption {
   display: block;
   margin-top: 2px;
   color: var(--muted);
   font-size: 9px;
   text-align: center;
-}
-
-.rate-legend {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  min-width: 66px;
-  color: var(--muted);
-  font-size: 9px;
-}
-
-.rate-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.rate-legend i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.rate-legend-base {
-  background: #e97b3f;
-}
-
-.rate-legend-normal {
-  background: #ff9f43;
-}
-
-.rate-legend-critical {
-  background: #ffbd75;
 }
 
 @media (max-width: 520px) {
@@ -567,18 +557,6 @@ h2 {
     font-size: 7px;
   }
 
-  .rate-graph-layout {
-    gap: 8px;
-  }
-
-  .rate-graph-layout .rate-graph {
-    flex-basis: 0;
-  }
-
-  .rate-legend {
-    min-width: 58px;
-    font-size: 8px;
-  }
 }
 
 .graph-axis {

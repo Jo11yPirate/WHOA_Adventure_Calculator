@@ -135,28 +135,15 @@
                 <small class="graph-assumption">The line shows the relative profile shape; values retain their original units.</small>
               </div>
               <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
-                <strong class="graph-title rate-graph-title">5-Minute Cumulative {% if selected_class == "Priest" %}HPS{% else %}DPS{% endif %}</strong>
-                <div class="rate-graph-layout">
-                  <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Five-minute cumulative {% if selected_class == "Priest" %}healing{% else %}damage{% endif %} graph">
-                    <path d="M40 12V126H500" class="graph-axis"></path>
-                    <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
-                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
-                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
-                    <text x="31" y="143" class="graph-label">0s</text>
-                    <text x="119" y="143" class="graph-label">60s</text>
-                    <text x="207" y="143" class="graph-label">120s</text>
-                    <text x="295" y="143" class="graph-label">180s</text>
-                    <text x="387" y="143" class="graph-label">240s</text>
-                    <text x="477" y="143" class="graph-label">300s</text>
-                  </svg>
-                  <div class="rate-legend" aria-label="Cumulative graph legend">
-                    <span><i class="rate-legend-base"></i>Base</span>
-                    <span><i class="rate-legend-normal"></i>Normal</span>
-                    <span><i class="rate-legend-critical"></i>Critical</span>
-                  </div>
-                </div>
-                <small class="graph-assumption">Cumulative total across 300 actions at 1 action per second.</small>
+                <strong class="graph-title dps-radar-title">DPS Combat Profile</strong>
+                <svg class="dps-radar" viewBox="0 0 220 190" role="img" aria-label="DPS combat profile radar chart">
+                  <g class="radar-grid"><polygon points="110,18 197,81 164,183 56,183 23,81"></polygon><polygon points="110,45 168,87 146,156 74,156 52,87"></polygon><polygon points="110,72 139,93 128,129 92,129 81,93"></polygon></g>
+                  <g class="radar-axes"><line x1="110" y1="100" x2="110" y2="18"></line><line x1="110" y1="100" x2="197" y2="81"></line><line x1="110" y1="100" x2="164" y2="183"></line><line x1="110" y1="100" x2="56" y2="183"></line><line x1="110" y1="100" x2="23" y2="81"></line></g>
+                  <polygon class="dps-radar-shape" points="110,100 110,100 110,100 110,100 110,100"></polygon><g class="dps-radar-points"></g>
+                  <text x="114" y="76" class="radar-scale">25</text><text x="114" y="52" class="radar-scale">50</text><text x="114" y="27" class="radar-scale">75</text>
+                </svg>
+                <div class="dps-radar-legend" aria-label="DPS radar chart legend"></div>
+                <small class="graph-assumption">Relative profile across output, critical rate, accuracy, penetration, and hit.</small>
               </div>
             </div>
             <div class="metric-grid">
@@ -212,28 +199,15 @@
                 </svg><div id="survival-profile-values" class="survival-profile-values"></div></div><small class="graph-assumption">The line shows the relative profile shape; values retain their original units.</small>
               </div>
               <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
-                <strong class="graph-title rate-graph-title">5-Minute Cumulative DPS</strong>
-                <div class="rate-graph-layout">
-                  <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Five-minute cumulative damage graph">
-                    <path d="M40 12V126H500" class="graph-axis"></path>
-                    <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
-                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
-                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
-                    <text x="31" y="143" class="graph-label">0s</text>
-                    <text x="119" y="143" class="graph-label">60s</text>
-                    <text x="207" y="143" class="graph-label">120s</text>
-                    <text x="295" y="143" class="graph-label">180s</text>
-                    <text x="387" y="143" class="graph-label">240s</text>
-                    <text x="477" y="143" class="graph-label">300s</text>
-                  </svg>
-                  <div class="rate-legend" aria-label="Cumulative graph legend">
-                    <span><i class="rate-legend-base"></i>Base</span>
-                    <span><i class="rate-legend-normal"></i>Normal</span>
-                    <span><i class="rate-legend-critical"></i>Critical</span>
-                  </div>
-                </div>
-                <small class="graph-assumption">Cumulative total across 300 actions at 1 action per second.</small>
+                <strong class="graph-title dps-radar-title">DPS Combat Profile</strong>
+                <svg class="dps-radar" viewBox="0 0 220 190" role="img" aria-label="DPS combat profile radar chart">
+                  <g class="radar-grid"><polygon points="110,18 197,81 164,183 56,183 23,81"></polygon><polygon points="110,45 168,87 146,156 74,156 52,87"></polygon><polygon points="110,72 139,93 128,129 92,129 81,93"></polygon></g>
+                  <g class="radar-axes"><line x1="110" y1="100" x2="110" y2="18"></line><line x1="110" y1="100" x2="197" y2="81"></line><line x1="110" y1="100" x2="164" y2="183"></line><line x1="110" y1="100" x2="56" y2="183"></line><line x1="110" y1="100" x2="23" y2="81"></line></g>
+                  <polygon class="dps-radar-shape" points="110,100 110,100 110,100 110,100 110,100"></polygon><g class="dps-radar-points"></g>
+                  <text x="114" y="76" class="radar-scale">25</text><text x="114" y="52" class="radar-scale">50</text><text x="114" y="27" class="radar-scale">75</text>
+                </svg>
+                <div class="dps-radar-legend" aria-label="DPS radar chart legend"></div>
+                <small class="graph-assumption">Relative profile across output, critical rate, accuracy, penetration, and hit.</small>
               </div>
             </div>
             <div class="metric-grid">

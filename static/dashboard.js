@@ -169,15 +169,36 @@ function updateSurvivabilityGraph(values) {
   });
 }
 
-function updateRateGraph(values) {
-  const seconds = [0, 60, 120, 180, 240, 300];
-  const xPositions = [40, 132, 224, 316, 408, 500];
-  const maximum = Math.max(...values, 1) * 300;
-  document.querySelectorAll(".rate-line").forEach((line) => {
-    const value = values[[...document.querySelectorAll(".rate-line")].indexOf(line)] ?? values[0];
-    line.setAttribute("points", seconds.map((second, index) =>
-      `${xPositions[index]},${126 - ((value * second) / maximum) * 92}`
-    ).join(" "));
+function updateDpsRadar(values) {
+  const angles = [-Math.PI / 2, -Math.PI / 2 + (2 * Math.PI / 5), -Math.PI / 2 + (4 * Math.PI / 5), -Math.PI / 2 + (6 * Math.PI / 5), -Math.PI / 2 + (8 * Math.PI / 5)];
+  const maximumOutput = Math.max(values[0], 1);
+  const labels = ["Output", "Critical Rate", "Accuracy", "Penetration", "Hit"];
+  const colors = ["#ffbd75", "#ff9f43", "#e97b3f", "#f28f3f", "#d96b32"];
+  const normalized = [
+    values[0] / maximumOutput,
+    values[1] / 100,
+    values[2] / 100,
+    values[3] / maximumOutput,
+    values[4] / 100,
+  ];
+  document.querySelectorAll(".dps-radar-shape").forEach((shape) => {
+    const points = normalized.map((value, index) => {
+      const radius = Math.min(1, value) * 82;
+      return `${110 + Math.cos(angles[index]) * radius},${100 + Math.sin(angles[index]) * radius}`;
+    });
+    shape.setAttribute("points", points.join(" "));
+    const pointGroup = shape.parentElement.querySelector(".dps-radar-points");
+    if (pointGroup) {
+      pointGroup.innerHTML = points.map((point, index) => {
+        const [x, y] = point.split(",");
+        return `<circle cx="${x}" cy="${y}" r="5" fill="${colors[index]}" class="dps-radar-point"></circle>`;
+      }).join("");
+    }
+  });
+  document.querySelectorAll(".dps-radar-legend").forEach((legend) => {
+    legend.innerHTML = labels.map((label, index) =>
+      `<span><i style="background:${colors[index]}"></i><b>${label}</b><em>${index === 0 ? format(values[index]) : `${values[index].toFixed(2)}${index === 1 || index === 2 ? "%" : ""}`}</em></span>`
+    ).join("");
   });
 }
 
@@ -263,18 +284,11 @@ function updatePriestOnly(className) {
   document.querySelectorAll(".screen-graph").forEach((graph) => {
     graph.setAttribute("aria-label", isHealing ? "Normal and critical healing graph" : "Normal and critical damage graph");
   });
-  document.querySelectorAll(".rate-graph").forEach((graph) => {
-    graph.setAttribute("aria-label", isHealing ? "Cumulative healing graph" : "Cumulative damage graph");
+  document.querySelectorAll(".dps-radar").forEach((graph) => {
+    graph.setAttribute("aria-label", isHealing ? "Healing combat profile radar chart" : "DPS combat profile radar chart");
   });
-  document.querySelectorAll(".rate-graph-title").forEach((title) => {
-    title.textContent = `5-Minute Cumulative ${isHealing ? "HPS" : "DPS"}`;
-  });
-  document.querySelectorAll(".rate-legend").forEach((legend) => {
-    legend.innerHTML = [
-      [isHealing ? "Base Heal" : "Base", "rate-legend-base"],
-      [isHealing ? "Normal Heal" : "Normal", "rate-legend-normal"],
-      [isHealing ? "Critical Heal" : "Critical", "rate-legend-critical"],
-    ].map(([label, className]) => `<span><i class="${className}"></i>${label}</span>`).join("");
+  document.querySelectorAll(".dps-radar-title").forEach((title) => {
+    title.textContent = `${isHealing ? "HPS" : "DPS"} Combat Profile`;
   });
 }
 
@@ -368,10 +382,12 @@ function runRecalculationPipeline() {
     setText("res-resilience", (effectiveHp / incomingHitBaseline).toFixed(2));
     setText("res-dodge", `${Math.min(100, evasion / enemyHitBaseline * 100).toFixed(2)}%`);
     setText("res-damage-reduction", `${(damageReduction * 100).toFixed(2)}%`);
-    updateRateGraph([
-      coreOutput,
+    updateDpsRadar([
       rawOutput * mitigation,
-      rawOutput * mitigation * criticalMultiplier,
+      criticalRate,
+      estimatedAccuracy,
+      penetrationRating,
+      hitRating,
     ]);
     updateSurvivabilityGraph([
       hp,
