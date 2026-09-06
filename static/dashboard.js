@@ -607,8 +607,30 @@ async function shareCurrentPage(actions) {
     setPageActionStatus(actions, "Shared");
     return;
   }
-  if (!navigator.clipboard) throw new Error("Clipboard sharing is unavailable.");
-  await navigator.clipboard.writeText(url);
+  let copied = false;
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    } catch {
+      copied = false;
+    }
+  }
+  if (!copied) {
+    const fallback = document.createElement("textarea");
+    fallback.value = url;
+    fallback.setAttribute("readonly", "");
+    fallback.style.position = "fixed";
+    fallback.style.opacity = "0";
+    document.body.appendChild(fallback);
+    fallback.select();
+    copied = document.execCommand("copy");
+    fallback.remove();
+  }
+  if (!copied) {
+    const manualCopy = window.prompt("Copy this calculator link:", url);
+    if (manualCopy === null) throw new DOMException("Share cancelled.", "AbortError");
+  }
   setPageActionStatus(actions, "Link copied");
 }
 
