@@ -69,14 +69,6 @@ const comparisonStorageKey = "whoa-adventure-comparison-stats";
 const enemyDefenseBaseline = 5000;
 const enemyHitBaseline = 5000;
 const incomingHitBaseline = 5000;
-const classDashboard = {
-  Priest: { skill: "Sanctifying Light", scaling: 2.6, label: "Sanctifying Light estimate", formula: "Base healing × 260% × Damage Bonus; healing ignores Defense" },
-  Warrior: { skill: "Earth Strike", scaling: 2.8, label: "Earth Strike estimate", formula: "(Attack + Penetration) × 280% × Damage Bonus × Defense mitigation" },
-  Assassin: { skill: "Shadow Blade", scaling: 4.8, label: "Shadow Blade estimate", formula: "(Attack + Penetration) × 480% × Damage Bonus × Defense mitigation" },
-  Archer: { skill: "Piercing Arrow", scaling: 3.5, label: "Piercing Arrow estimate", formula: "(Attack + Penetration) × 350% × Damage Bonus × Defense mitigation" },
-  Mage: { skill: "Astral Comet", scaling: 4.2, label: "Astral Comet estimate", formula: "(Attack + Penetration) × 420% × Damage Bonus × Defense mitigation" },
-};
-
 function saveCalculatorState(form, classSelect) {
   const state = {
     className: classSelect.value,
@@ -378,9 +370,6 @@ function updatePriestOnly(className) {
   document.querySelectorAll(".priest-only").forEach((element) => {
     element.hidden = className !== "Priest";
   });
-  const dashboard = classDashboard[className];
-  setAllText("#res-skill-label", dashboard.label);
-  setAllText("#res-skill-note", dashboard.formula);
   setAllText("#res-rate-label", className === "Priest" ? "HPS" : "DPS");
   setAllText("#res-five-minute-label", className === "Priest" ? "5-Minute Healing" : "5-Minute Damage");
   const label = document.getElementById("critical-rate-label");
@@ -520,9 +509,7 @@ function runRecalculationPipeline() {
     const defenseMultiplier = 1 / (1 + defense / 2000);
     const incomingDamageMultiplier = defenseMultiplier * (1 - damageReduction);
     const effectiveHp = incomingDamageMultiplier ? hp / incomingDamageMultiplier : hp;
-    const dashboard = classDashboard[document.getElementById("class-select").value];
     const classMitigation = isHealing ? 1 : mitigation;
-    const skillEstimate = coreOutput * dashboard.scaling * (1 + outputBonus) * classMitigation;
     const normalRate = rawOutput * classMitigation;
 
     setText("res-raw", format(rawOutput));
@@ -536,7 +523,6 @@ function runRecalculationPipeline() {
     setText("res-resilience", (effectiveHp / incomingHitBaseline).toFixed(2));
     setText("res-dodge", `${Math.min(100, evasion / enemyHitBaseline * 100).toFixed(2)}%`);
     setText("res-damage-reduction", `${(damageReduction * 100).toFixed(2)}%`);
-    setText("res-skill-estimate", format(skillEstimate));
     setText("res-rate", format(normalRate));
     setText("res-five-minute", format(normalRate * 300));
     setText("res-penetration-effectiveness", `${Math.max(0, (isHealing ? 0 : ((classMitigation / (1 / (1 + enemyDefenseBaseline / 2000))) - 1) * 100)).toFixed(2)}%`);
