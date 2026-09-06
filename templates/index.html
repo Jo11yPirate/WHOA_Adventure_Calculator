@@ -14,7 +14,6 @@
         <p class="eyebrow">WHOA ADVENTURE - STAT CALCULATOR</p>
         <p class="notice"><strong>User-Driven Stat Analysis:</strong> Enter your in-game stats to compare outputs and understand how each value affects your build. This is an unofficial fan-made tool and is not affiliated with, endorsed by, or sponsored by Joy Nice Games.</p>
       </section>
-
       <section class="content-grid">
         <form id="calculator" class="card stats-form" method="post">
           {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
@@ -78,6 +77,12 @@
           </div>
         </form>
       </section>
+      <div class="page-actions" data-page-actions>
+        <button type="button" data-page-action="save">Save</button>
+        <button type="button" data-page-action="print">Print</button>
+        <button type="button" data-page-action="share">Share</button>
+        <span class="page-action-status" aria-live="polite"></span>
+      </div>
       </section>
 
       <section id="visualization" class="app-page card calculator-window visualization-page" data-app-page="visualization">
@@ -130,18 +135,28 @@
                 </svg>
               </div>
               <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
-                <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Per-second output line graph">
-                  <path d="M40 12V126H500" class="graph-axis"></path>
-                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                  <polyline class="rate-line" points="40,126 265,126 490,126"></polyline>
-                  <circle class="rate-point" cx="40" cy="126" r="4"></circle>
-                  <circle class="rate-point" cx="265" cy="126" r="4"></circle>
-                  <circle class="rate-point" cx="490" cy="126" r="4"></circle>
-                  <text x="22" y="143" class="graph-label">Base</text>
-                  <text x="245" y="143" class="graph-label">Normal</text>
-                  <text x="465" y="143" class="graph-label">Crit</text>
-                </svg>
-                <small class="graph-assumption">Assumes 1 action per second</small>
+                <strong class="graph-title">5-Minute Cumulative {% if selected_class == "Priest" %}HPS{% else %}DPS{% endif %}</strong>
+                <div class="rate-graph-layout">
+                  <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Five-minute cumulative {% if selected_class == "Priest" %}healing{% else %}damage{% endif %} graph">
+                    <path d="M40 12V126H500" class="graph-axis"></path>
+                    <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
+                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
+                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
+                    <text x="31" y="143" class="graph-label">0s</text>
+                    <text x="119" y="143" class="graph-label">60s</text>
+                    <text x="207" y="143" class="graph-label">120s</text>
+                    <text x="295" y="143" class="graph-label">180s</text>
+                    <text x="387" y="143" class="graph-label">240s</text>
+                    <text x="477" y="143" class="graph-label">300s</text>
+                  </svg>
+                  <div class="rate-legend" aria-label="Cumulative graph legend">
+                    <span><i class="rate-legend-base"></i>Base</span>
+                    <span><i class="rate-legend-normal"></i>Normal</span>
+                    <span><i class="rate-legend-critical"></i>Critical</span>
+                  </div>
+                </div>
+                <small class="graph-assumption">Cumulative total across 300 actions at 1 action per second.</small>
               </div>
             </div>
             <div class="metric-grid">
@@ -205,18 +220,28 @@
                 </svg>
               </div>
               <div class="screen-panel" data-screen-panel="rate" role="tabpanel" hidden>
-                <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Per-second output line graph">
-                  <path d="M40 12V126H500" class="graph-axis"></path>
-                  <path d="M40 42H500M40 84H500" class="graph-grid"></path>
-                  <polyline class="rate-line" points="40,126 265,126 490,126"></polyline>
-                  <circle class="rate-point" cx="40" cy="126" r="4"></circle>
-                  <circle class="rate-point" cx="265" cy="126" r="4"></circle>
-                  <circle class="rate-point" cx="490" cy="126" r="4"></circle>
-                  <text x="22" y="143" class="graph-label">Base</text>
-                  <text x="245" y="143" class="graph-label">Normal</text>
-                  <text x="465" y="143" class="graph-label">Crit</text>
-                </svg>
-                <small class="graph-assumption">Assumes 1 action per second</small>
+                <strong class="graph-title">5-Minute Cumulative DPS</strong>
+                <div class="rate-graph-layout">
+                  <svg class="rate-graph" viewBox="0 0 520 150" role="img" aria-label="Five-minute cumulative damage graph">
+                    <path d="M40 12V126H500" class="graph-axis"></path>
+                    <path d="M40 42H500M40 84H500" class="graph-grid"></path>
+                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
+                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
+                    <polyline class="rate-line" points="40,126 132,126 224,126 316,126 408,126 500,126"></polyline>
+                    <text x="31" y="143" class="graph-label">0s</text>
+                    <text x="119" y="143" class="graph-label">60s</text>
+                    <text x="207" y="143" class="graph-label">120s</text>
+                    <text x="295" y="143" class="graph-label">180s</text>
+                    <text x="387" y="143" class="graph-label">240s</text>
+                    <text x="477" y="143" class="graph-label">300s</text>
+                  </svg>
+                  <div class="rate-legend" aria-label="Cumulative graph legend">
+                    <span><i class="rate-legend-base"></i>Base</span>
+                    <span><i class="rate-legend-normal"></i>Normal</span>
+                    <span><i class="rate-legend-critical"></i>Critical</span>
+                  </div>
+                </div>
+                <small class="graph-assumption">Cumulative total across 300 actions at 1 action per second.</small>
               </div>
             </div>
             <div class="metric-grid">
@@ -259,6 +284,12 @@
           </div>
         </section>
         </div>
+        <div class="page-actions" data-page-actions>
+          <button type="button" data-page-action="save">Save</button>
+          <button type="button" data-page-action="print">Print</button>
+          <button type="button" data-page-action="share">Share</button>
+          <span class="page-action-status" aria-live="polite"></span>
+        </div>
       </section>
 
       <section id="compare" class="app-page card guide" data-app-page="compare">
@@ -289,6 +320,12 @@
           <button id="compare-calculate" type="button">Calculate Stats <span aria-hidden="true">→</span></button>
           <button id="compare-clear-all" type="button" class="secondary-button">Clear All Stats</button>
           <button id="compare-clear-equipment" type="button" class="secondary-button">Clear Equip Stats</button>
+        </div>
+        <div class="page-actions" data-page-actions>
+          <button type="button" data-page-action="save">Save</button>
+          <button type="button" data-page-action="print">Print</button>
+          <button type="button" data-page-action="share">Share</button>
+          <span class="page-action-status" aria-live="polite"></span>
         </div>
       </section>
 
@@ -324,9 +361,15 @@
           </div>
         </div>
         <div class="reference-credit">
-          <p>Combat models provided by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.<br>Special thanks to Spade, JMS, &amp; Devon for crucial editing advice.</p>
+          <p>Combat models provided and tested by <a href="https://docs.google.com/spreadsheets/d/1HYeBoEnzPC1bRy30Nln9zD21KCUWjVXA/edit?gid=283237974#gid=283237974" target="_blank" rel="noopener noreferrer">Noblesse's ASCENDANCY Combat Lab</a>.<br>Special thanks to Spade, JMS, &amp; Devon for crucial editing advice.</p>
           <p class="creator-credit">Created by <a href="https://github.com/Jo11yPirate/WHOA_Adventure_Calculator" target="_blank" rel="noopener noreferrer">Jo11yPirate</a> with use of agentic AI</p>
           <p class="license-credit">Code is available for use under the <a href="https://github.com/Jo11yPirate/WHOA_Adventure_Calculator/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.</p>
+        </div>
+        <div class="page-actions" data-page-actions>
+          <button type="button" data-page-action="save">Save</button>
+          <button type="button" data-page-action="print">Print</button>
+          <button type="button" data-page-action="share">Share</button>
+          <span class="page-action-status" aria-live="polite"></span>
         </div>
       </section>
     </main>

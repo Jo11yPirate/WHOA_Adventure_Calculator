@@ -156,13 +156,14 @@ function updateSurvivabilityGraph(values) {
 }
 
 function updateRateGraph(values) {
-  const maximum = Math.max(...values, 1);
-  const yValues = values.map((value) => 126 - (value / maximum) * 92);
+  const seconds = [0, 60, 120, 180, 240, 300];
+  const xPositions = [40, 132, 224, 316, 408, 500];
+  const maximum = Math.max(...values, 1) * 300;
   document.querySelectorAll(".rate-line").forEach((line) => {
-    line.setAttribute("points", yValues.map((y, index) => `${[40, 265, 490][index]},${y}`).join(" "));
-  });
-  document.querySelectorAll(".rate-point").forEach((point, index) => {
-    if (yValues[index] !== undefined) point.setAttribute("cy", String(yValues[index]));
+    const value = values[[...document.querySelectorAll(".rate-line")].indexOf(line)] ?? values[0];
+    line.setAttribute("points", seconds.map((second, index) =>
+      `${xPositions[index]},${126 - ((value * second) / maximum) * 92}`
+    ).join(" "));
   });
 }
 
@@ -324,9 +325,11 @@ function runRecalculationPipeline() {
     updateCharts(rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier, baseAttribute, readOptionalNumber("stat_defense_rating"), penetrationRating, outputBonus, enemyDefenseBaseline, mitigation, 0, 0, 0);
     document.getElementById("val-crit-bonus")?.classList.toggle("diminished", critEvaluation.diminished);
     error.hidden = true;
+    return true;
   } catch (validationError) {
     error.textContent = validationError.message;
     error.hidden = false;
+    return false;
   }
 }
 
@@ -357,6 +360,52 @@ function showAppPage(pageName) {
     link.classList.toggle("is-active", link.dataset.pageTarget === pageName);
   });
 }
+
+function setPageActionStatus(actions, message) {
+  const status = actions.querySelector(".page-action-status");
+  if (!status) return;
+  status.textContent = message;
+  window.setTimeout(() => {
+    if (status.textContent === message) status.textContent = "";
+  }, 2500);
+}
+
+async function shareCurrentPage(actions) {
+  const page = actions.closest("[data-app-page]");
+  const title = page?.querySelector(".eyebrow")?.textContent || document.title;
+  const url = `${window.location.origin}${window.location.pathname}${window.location.hash}`;
+  if (navigator.share) {
+    await navigator.share({ title, text: "Whoa Adventure Stat Calculator", url });
+    setPageActionStatus(actions, "Shared");
+    return;
+  }
+  if (!navigator.clipboard) throw new Error("Clipboard sharing is unavailable.");
+  await navigator.clipboard.writeText(url);
+  setPageActionStatus(actions, "Link copied");
+}
+
+document.querySelectorAll("[data-page-actions]").forEach((actions) => {
+  actions.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-page-action]");
+    if (!button) return;
+    const action = button.dataset.pageAction;
+    if (action === "save") {
+      const calculatorForm = document.querySelector(".stats-form");
+      const classSelect = document.getElementById("class-select");
+      if (calculatorForm && classSelect) saveCalculatorState(calculatorForm, classSelect);
+      saveComparisonState();
+      setPageActionStatus(actions, "Saved");
+    } else if (action === "print") {
+      window.print();
+    } else if (action === "share") {
+      try {
+        await shareCurrentPage(actions);
+      } catch (error) {
+        if (error.name !== "AbortError") setPageActionStatus(actions, "Share unavailable");
+      }
+    }
+  });
+});
 
 pageLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
@@ -417,6 +466,13 @@ if (calculatorForm) {
       saveCalculatorState(calculatorForm, classSelect);
       runRecalculationPipeline();
     });
+  });
+  calculatorForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (runRecalculationPipeline()) {
+      showAppPage("visualization");
+      history.replaceState(null, "", "#visualization");
+    }
   });
   runRecalculationPipeline();
   updateClassReference(classSelect.value);

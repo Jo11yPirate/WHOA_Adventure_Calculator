@@ -115,6 +115,46 @@ h2 {
   padding-left: 12px;
 }
 
+.page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: fit-content;
+  margin: 18px auto 0;
+}
+
+.page-actions button {
+  min-width: 64px;
+  border: 1px solid #6b6258;
+  border-radius: 4px;
+  background: #28231e;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 750;
+  padding: 7px 10px;
+}
+
+.page-actions button:hover,
+.page-actions button:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.page-action-status {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 9px;
+  text-align: left;
+}
+
+#calculator-page > .page-actions {
+  margin-top: 18px;
+}
+
 .content-grid {
   display: grid;
   grid-template-columns: minmax(280px, 0.8fr) minmax(400px, 1.2fr);
@@ -353,12 +393,47 @@ h2 {
   margin-top: 5px;
 }
 
+.rate-graph-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.rate-graph-layout .rate-graph {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.graph-title {
+  display: block;
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .rate-line {
   fill: none;
   stroke: var(--accent);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.rate-line:nth-child(3) {
+  stroke: #e97b3f;
+}
+
+.rate-line:nth-child(4) {
+  stroke: #ff9f43;
+}
+
+.rate-line:nth-child(5) {
+  stroke: #ffbd75;
 }
 
 .rate-point {
@@ -372,7 +447,56 @@ h2 {
   margin-top: 2px;
   color: var(--muted);
   font-size: 9px;
-  text-align: right;
+  text-align: center;
+}
+
+.rate-legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 66px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.rate-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rate-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.rate-legend-base {
+  background: #e97b3f;
+}
+
+.rate-legend-normal {
+  background: #ff9f43;
+}
+
+.rate-legend-critical {
+  background: #ffbd75;
+}
+
+@media (max-width: 520px) {
+  .rate-graph-layout {
+    gap: 8px;
+  }
+
+  .rate-graph-layout .rate-graph {
+    flex-basis: 0;
+  }
+
+  .rate-legend {
+    min-width: 58px;
+    font-size: 8px;
+  }
 }
 
 .graph-axis {
@@ -1055,6 +1179,49 @@ code {
 
 .reference-credit a {
   color: var(--accent);
+}
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .page-shell {
+    max-width: none;
+  }
+
+  .app-page:not(.is-page-active),
+  .quick-nav,
+  .page-actions,
+  .form-actions,
+  .hero {
+    display: none !important;
+  }
+
+  .app-page.is-page-active {
+    display: block !important;
+    border: 0;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .page-actions {
+    gap: 4px;
+    max-width: 100%;
+  }
+
+  .page-actions button {
+    flex: 0 1 auto;
+    min-width: 58px;
+    min-height: 38px;
+    padding: 7px 8px;
+  }
+
+  .page-action-status {
+    display: none;
+  }
 }
 
 .class-reference {
