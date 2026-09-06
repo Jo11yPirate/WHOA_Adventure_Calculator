@@ -446,15 +446,22 @@ function updateComparison() {
     stat_evasion: "Evasion",
     stat_crit_resistance: "Crit Res",
   };
+  const hasEquipmentValue = {};
+  document.querySelectorAll(".compare-item").forEach((input) => {
+    hasEquipmentValue[input.dataset.stat] = input.value.trim() !== "";
+  });
   output.innerHTML = Object.entries(labels).map(([stat, label]) => {
     const before = current[stat] || 0;
-    const gained = item[stat] || 0;
-    const change = gained;
-    return `<article class="metric"><span>${label}</span><strong>${format(before + change)}</strong><small>${change >= 0 ? "+" : ""}${format(change)} from equipment</small></article>`;
+    const change = hasEquipmentValue[stat] ? (item[stat] || 0) - before : 0;
+    const result = before + change;
+    const changeLabel = change < 0
+      ? `${format(Math.abs(change))} lost from new gear`
+      : `+${format(change)} from new gear`;
+    return `<article class="metric${change < 0 ? " loss" : ""}"><span>${label}</span><strong>${format(result)}</strong><small>${changeLabel}</small></article>`;
   }).join("");
   const changes = Object.entries(labels).map(([stat, label]) => ({
     label,
-    change: item[stat] || 0,
+    change: hasEquipmentValue[stat] ? (item[stat] || 0) - (current[stat] || 0) : 0,
     before: current[stat] || 0,
   }));
   const maximum = Math.max(...changes.map(({ change }) => Math.abs(change)), 1);
@@ -626,11 +633,18 @@ function setPageActionStatus(actions, message) {
   status.textContent = message;
   window.setTimeout(() => {
     if (status.textContent === message) status.textContent = "";
-  }, 2500);
+  }, 10000);
+}
+
+function isMobileBrowser() {
+  return window.matchMedia("(max-width: 760px)").matches
+    || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 }
 
 function printCurrentPage(actions) {
-  setPageActionStatus(actions, "Opening print dialog...");
+  setPageActionStatus(actions, isMobileBrowser()
+    ? "Opening print options..."
+    : "Choose Save as PDF in the print dialog...");
   window.print();
 }
 
@@ -667,7 +681,7 @@ async function shareCurrentPage(actions) {
     const manualCopy = window.prompt("Copy this calculator link:", url);
     if (manualCopy === null) throw new DOMException("Share cancelled.", "AbortError");
   }
-  setPageActionStatus(actions, "Link copied");
+  setPageActionStatus(actions, "Link copied - paste into email or chat");
 }
 
 document.querySelectorAll("[data-page-actions]").forEach((actions) => {
@@ -676,11 +690,14 @@ document.querySelectorAll("[data-page-actions]").forEach((actions) => {
     if (!button) return;
     const action = button.dataset.pageAction;
     if (action === "save") {
-      const calculatorForm = document.querySelector(".stats-form");
-      const classSelect = document.getElementById("class-select");
-      if (calculatorForm && classSelect) saveCalculatorState(calculatorForm, classSelect);
-      saveComparisonState();
-      setPageActionStatus(actions, "Saved on this device");
+      const page = actions.closest("[data-app-page]");
+      if (page?.id === "visualization" || page?.id === "compare") {
+        const calculatorForm = document.querySelector(".stats-form");
+        const classSelect = document.getElementById("class-select");
+        if (calculatorForm && classSelect) saveCalculatorState(calculatorForm, classSelect);
+        saveComparisonState();
+        printCurrentPage(actions);
+      }
     } else if (action === "print") {
       printCurrentPage(actions);
     } else if (action === "share") {
