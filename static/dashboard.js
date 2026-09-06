@@ -593,6 +593,11 @@ function setPageActionStatus(actions, message) {
   }, 2500);
 }
 
+function printCurrentPage(actions) {
+  setPageActionStatus(actions, "Opening print dialog...");
+  window.print();
+}
+
 async function shareCurrentPage(actions) {
   const page = actions.closest("[data-app-page]");
   const title = page?.querySelector(".eyebrow")?.textContent || document.title;
@@ -617,9 +622,9 @@ document.querySelectorAll("[data-page-actions]").forEach((actions) => {
       const classSelect = document.getElementById("class-select");
       if (calculatorForm && classSelect) saveCalculatorState(calculatorForm, classSelect);
       saveComparisonState();
-      setPageActionStatus(actions, "Saved");
+      setPageActionStatus(actions, "Saved on this device");
     } else if (action === "print") {
-      window.print();
+      printCurrentPage(actions);
     } else if (action === "share") {
       try {
         await shareCurrentPage(actions);

@@ -153,9 +153,20 @@ h2 {
 
 .page-action-status {
   min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
   color: var(--muted);
   font-size: 9px;
+  font-weight: 750;
+  line-height: 1.2;
+  padding: 5px 6px;
   text-align: left;
+}
+
+.page-action-status:not(:empty) {
+  border-color: #6b6258;
+  background: #28231e;
+  color: var(--accent);
 }
 
 #calculator-page > .page-actions {
