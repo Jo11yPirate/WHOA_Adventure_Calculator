@@ -462,6 +462,83 @@ h2 {
   margin: 4px auto 0;
 }
 
+.dps-radar[hidden],
+.dps-radar-legend[hidden],
+.hps-line-chart[hidden],
+.hps-lines-title[hidden],
+.hps-line-legend[hidden] {
+  display: none !important;
+}
+
+.hps-lines-title,
+.hps-line-chart,
+.hps-line-legend {
+  display: none;
+}
+
+.hps-lines-title:not([hidden]) {
+  display: block;
+}
+
+.hps-line-chart {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: 150px;
+  margin: 4px auto 0;
+}
+
+.hps-line-legend:not([hidden]) {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.hps-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.hps-line-raw {
+  stroke: #f97316;
+}
+
+.hps-line-normal {
+  stroke: #c2410c;
+}
+
+.hps-line-critical {
+  stroke: #fed7aa;
+}
+
+.hps-line-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hps-line-legend i {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.hps-legend-raw {
+  background: #f97316;
+}
+
+.hps-legend-normal {
+  background: #c2410c;
+}
+
+.hps-legend-critical {
+  background: #fed7aa;
+}
+
 .radar-grid polygon,
 .radar-axes line {
   fill: none;
@@ -573,12 +650,12 @@ h2 {
 }
 
 .graph-bar {
-  fill: #c76b2c;
+  fill: #c2410c;
   transition: y 180ms ease-out, height 180ms ease-out;
 }
 
 .graph-bar-hot {
-  fill: var(--accent);
+  fill: #fed7aa;
 }
 
 .graph-label {
@@ -952,7 +1029,7 @@ button:hover {
   width: 0;
   height: 100%;
   border-radius: 1px;
-  background: linear-gradient(90deg, #e97b3f, #ffbd75);
+  background: linear-gradient(90deg, #c2410c, #fed7aa);
   transition: width 180ms ease-out;
 }
 

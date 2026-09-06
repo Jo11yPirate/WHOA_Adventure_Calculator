@@ -127,7 +127,7 @@ function updateBreakdownPie(className, attack, penetration, hit, hp, defense, ev
       ? [["Attack", attack], ["Penetration", penetration], ["Hit", hit]]
       : [["Attack", attack], ["Penetration", penetration]];
   const total = entries.reduce((sum, [, value]) => sum + value, 0);
-  const colors = ["#ffbd75", "#ff9f43", "#e97b3f"];
+  const colors = ["#fed7aa", "#f97316", "#c2410c"];
   let offset = 0;
   const stops = entries.map(([label, value], index) => {
     const start = offset;
@@ -148,7 +148,7 @@ function updateSurvivabilityGraph(values) {
   const maximum = Math.max(...values, 1);
   const xPositions = [35, 105, 175, 245, 315];
   const points = values.map((value, index) => `${xPositions[index]},${145 - (value / maximum) * 125}`);
-  const colors = ["#e97b3f", "#f28f3f", "#ff9f43", "#ffad5c", "#ffbd75"];
+  const colors = ["#c2410c", "#ea580c", "#f97316", "#f59e0b", "#fed7aa"];
   document.querySelectorAll("#survival-profile-lines").forEach((group) => {
     group.innerHTML = points.slice(0, -1).map((point, index) =>
       `<line x1="${point.split(",")[0]}" y1="${point.split(",")[1]}" x2="${points[index + 1].split(",")[0]}" y2="${points[index + 1].split(",")[1]}" stroke="${colors[index]}" class="survivability-segment"></line>`
@@ -173,7 +173,7 @@ function updateDpsRadar(values) {
   const angles = [-Math.PI / 2, -Math.PI / 2 + (2 * Math.PI / 5), -Math.PI / 2 + (4 * Math.PI / 5), -Math.PI / 2 + (6 * Math.PI / 5), -Math.PI / 2 + (8 * Math.PI / 5)];
   const maximumOutput = Math.max(values[0], 1);
   const labels = ["Output", "Critical Rate", "Accuracy", "Penetration", "Hit"];
-  const colors = ["#ffbd75", "#ff9f43", "#e97b3f", "#f28f3f", "#d96b32"];
+  const colors = ["#fed7aa", "#f97316", "#c2410c", "#ea580c", "#9a3412"];
   const normalized = [
     values[0] / maximumOutput,
     values[1] / 100,
@@ -202,6 +202,18 @@ function updateDpsRadar(values) {
   });
 }
 
+function updateHpsRateGraph(values) {
+  const seconds = [0, 60, 120, 180, 240, 300];
+  const xPositions = [40, 132, 224, 316, 408, 500];
+  const maximum = Math.max(...values, 1) * 300;
+  document.querySelectorAll(".hps-line").forEach((line, index) => {
+    const value = values[index] ?? values[0];
+    line.setAttribute("points", seconds.map((second, pointIndex) =>
+      `${xPositions[pointIndex]},${126 - ((value * second) / maximum) * 92}`
+    ).join(" "));
+  });
+}
+
 function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, penetration, outputBonus, enemyDefense, mitigation, incomingDamage, damageReduction, damageReceived) {
   const isHealing = document.getElementById("class-select")?.value === "Priest";
   const outputMax = Math.max(rawOutput, criticalOutput, 1);
@@ -224,8 +236,8 @@ function updateCharts(rawOutput, normalOutput, criticalOutput, attack, defense, 
   setText("screen-critical", format(criticalOutput));
   document.querySelectorAll("#output-graph-legend").forEach((legend) => {
     const labels = isHealing
-      ? [["Heal", normalOutput, "#e97b3f"], ["Crit Heal", criticalOutput, "#ffbd75"]]
-      : [["Normal", normalOutput, "#e97b3f"], ["Crit", criticalOutput, "#ffbd75"]];
+      ? [["Heal", normalOutput, "#c2410c"], ["Crit Heal", criticalOutput, "#fed7aa"]]
+      : [["Normal", normalOutput, "#c2410c"], ["Crit", criticalOutput, "#fed7aa"]];
     legend.innerHTML = [
       ...labels
     ].map(([label, value, color]) =>
@@ -285,8 +297,19 @@ function updatePriestOnly(className) {
     graph.setAttribute("aria-label", isHealing ? "Normal and critical healing graph" : "Normal and critical damage graph");
   });
   document.querySelectorAll(".dps-radar").forEach((graph) => {
+    graph.hidden = isHealing;
+    graph.style.display = isHealing ? "none" : "";
     graph.setAttribute("aria-label", isHealing ? "Healing combat profile radar chart" : "DPS combat profile radar chart");
   });
+  document.querySelectorAll(".dps-radar-legend").forEach((legend) => {
+    legend.hidden = isHealing;
+    legend.style.display = isHealing ? "none" : "";
+  });
+  document.querySelectorAll(".dps-radar-title").forEach((title) => {
+    title.hidden = isHealing;
+    title.style.display = isHealing ? "none" : "";
+  });
+  document.querySelectorAll(".hps-line-chart, .hps-lines-title, .hps-line-legend").forEach((element) => { element.hidden = !isHealing; });
   document.querySelectorAll(".dps-radar-title").forEach((title) => {
     title.textContent = `${isHealing ? "HPS" : "DPS"} Combat Profile`;
   });
@@ -389,6 +412,7 @@ function runRecalculationPipeline() {
       penetrationRating,
       hitRating,
     ]);
+    updateHpsRateGraph([rawOutput, rawOutput * mitigation, rawOutput * mitigation * criticalMultiplier]);
     updateSurvivabilityGraph([
       hp,
       effectiveHp,
