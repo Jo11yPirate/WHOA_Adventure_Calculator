@@ -64,7 +64,15 @@ body {
 }
 
 .app-page[hidden] {
-  display: none;
+  display: none !important;
+}
+
+.app-page:not(.is-page-active) {
+  display: none !important;
+}
+
+.app-page.is-page-active {
+  display: block;
 }
 
 .quick-nav a.is-active {
